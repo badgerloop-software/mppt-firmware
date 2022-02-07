@@ -8,12 +8,18 @@
 #define MPPT_MOV_ID MPPT_BASE_ID + 10 // max output voltage
 #define MPPT_MIC_ID MPPT_BASE_ID + 11 // max input current
 
+
 class Mppt {
   private:
-    Mutex mutex;
-    uint8_t mode;
-    float maxOutputVoltage;
-    float maxInputCurrent;
+    struct mFloat {
+      Mutex mutex;
+      float value;
+    } maxOutputVoltage, maxInputCurrent;
+
+    struct mU8 {
+      Mutex mutex;
+      uint8_t value;
+    } mode;
   public:
     bool notParsed(CANMessage msg);
 };
