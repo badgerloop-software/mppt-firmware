@@ -6,24 +6,15 @@ bool Mppt::notParsed(CANMessage msg) {
   switch (msg.id) {
 
     case MPPT_MOV_ID:
-      maxOutputVoltage.mutex.lock();
-      memcpy(&maxOutputVoltage.value, msg.data, 4);
-      printf("Set Max Output Voltage to %.6f\n",maxOutputVoltage.value);
-      maxOutputVoltage.mutex.unlock();
+      maxOutputVoltage.setValue(msg.data);
       break;
 
     case MPPT_MIC_ID:
-      maxInputCurrent.mutex.lock();
-      memcpy(&maxInputCurrent.value, msg.data, 4);
-      printf("Set Max Input Current to %.6f\n",maxInputCurrent.value);
-      maxInputCurrent.mutex.unlock();
+      maxInputCurrent.setValue(msg.data);
       break;
 
     case MPPT_MODE_ID:
-      mode.mutex.lock();
-      memcpy(&mode.value, msg.data, 1);
-      printf("Set Mode to %u\n",mode.value);
-      mode.mutex.unlock();
+      mode.setValue(msg.data);
       break;
 
     default:
