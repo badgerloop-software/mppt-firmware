@@ -10,9 +10,10 @@
 
 class Mppt {
   private:
+    Mutex mutex;
     uint8_t mode;
-    uint32_t maxOutputVoltage;
-    uint32_t maxInputCurrent;
+    float maxOutputVoltage;
+    float maxInputCurrent;
   public:
-    int parseMsg(CANMessage msg);
+    bool notParsed(CANMessage msg);
 };
