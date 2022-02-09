@@ -12,23 +12,29 @@ template <typename T>
 struct mutexVar {
   private:
     Mutex mutex;
-    T value;
+    volatile T value;
   public:
+    /* volatile cannot be memcpy'd
+     * so memcpy to a tmp var
+     * then set the volatile
+     */
     void setValue(unsigned char data[8]) {
+      T tmp;
+      memcpy(&tmp, data, sizeof(T));
       mutex.lock();
-      memcpy(&value, data, sizeof(T));
+      value = tmp;
       mutex.unlock();
     }
-    /* to unlock the mutex before returning,
-     * the value must be copied otherwise
-     * returning the value would
-     * leave the mutex locked
+    /* reading a variable
+     * doesn't require a
+     * mutex lock and unlock
+     *
+     * but the value is private
+     * so it can only be changed
+     * via setValue, utilizing the mutex
      */
-    T getValue(unsigned char data[8]) {
-      mutex.lock();
-      T tmp = value;
-      mutex.unlock();
-      return tmp;
+    T getValue(void) {
+      return value;
     }
 };
 
@@ -38,12 +44,14 @@ class BoostConverter {
     AnalogIn currentADC;
   public:
     BoostConverter(PinName v, PinName i);
-    float getChargeCurrent(void);
+    float getInputCurrent(void);
+    float getInputVoltage(void);
 };
 
 class Mppt {
   private:
     CAN *can;
+    AnalogIn batteryADC;
     BoostConverter bc1;
     BoostConverter bc2;
     BoostConverter bc3;
@@ -53,6 +61,7 @@ class Mppt {
     mutexVar<float> maxChargeCurrent;
     mutexVar<uint8_t> mode;
     bool notParsed(CANMessage msg);
+    float getBatteryVoltage(void);
   public:
     Mppt(void);
     ~Mppt(void);

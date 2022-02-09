@@ -24,16 +24,21 @@ BoostConverter::BoostConverter(PinName v, PinName i) : voltageADC(AnalogIn(v)), 
  * storing the value, because
  * the value could change quickly
  */
-float BoostConverter::getChargeCurrent(void) {
+float BoostConverter::getInputCurrent(void) {
   return currentADC.read_voltage();
 }
-
+float BoostConverter::getInputVoltage(void) {
+  return voltageADC.read_voltage();
+}
+float Mppt::getBatteryVoltage(void) {
+  return batteryADC.read_voltage();
+}
 
 /* void constructor, because
  * we already know exactly
  * what pins the Mppt will use
  */
-Mppt::Mppt(void) : bc1(BoostConverter(PA_7, PA_6)), bc2(BoostConverter (PA_5, PA_4)), bc3(BoostConverter (PA_3, PA_2)), can(&c) {}
+Mppt::Mppt(void) : batteryADC(AnalogIn(PB_0)), bc1(BoostConverter(PA_7, PA_6)), bc2(BoostConverter (PA_5, PA_4)), bc3(BoostConverter (PA_3, PA_2)), can(&c) {}
 
 /* kill the thread and join
  * before destroying the object
@@ -43,7 +48,7 @@ Mppt::~Mppt(void) {
   thread.join();
 }
 
-/* Seperate function to init
+/* Separate function to init
  *
  * "Eric taught me"
  * in Kanye Blame Game woman voice
