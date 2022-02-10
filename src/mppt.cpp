@@ -1,16 +1,16 @@
 #include "mppt.h"
 #include "mbed.h"
 
-/* static CAN bus means
- * it will last the whole program 
+/* static means it will last the whole program 
+ * and can only be accessed in this file
  * 
  * CAN objects are not copyable 
- * meaning they cannot be created
- * like the AnalogIn and BoostConverter,
- * then copied into the class,
+ * meaning they cannot copied into the class,
+ * like the AnalogIn and BoostConverter can,
  * they must be passed by reference 
+ * Because of this I'll pass everything by reference
  *
- * a static CAN object is better than
+ * a static object is better than
  * using the new keyword 
  * to create it on the heap */
 static CAN c(PA_11, PA_12); 
@@ -18,7 +18,19 @@ static CAN c(PA_11, PA_12);
 /* BoostConverter will read the ADC
  * for current in and voltage in
  */
-BoostConverter::BoostConverter(PinName v, PinName i) : voltageADC(AnalogIn(v)), currentADC(AnalogIn(i)) {}
+BoostConverter::BoostConverter(PinName v, PinName i, PinName p) : voltageADC(AnalogIn(v)), currentADC(AnalogIn(i)), pwm(PwmOut(p)) {
+  pwm.period_us(12.5); // 12.5uS is 80000hZ
+}
+
+/*
+ * Period is already set
+ * Change duty cycle
+ *
+ * To turn off, set duty <- 0.0
+ */
+void BoostConverter::setPWM(float duty) {
+  pwm.write(duty);
+}
 
 /* directly read the pin rather than
  * storing the value, because
@@ -38,7 +50,7 @@ float Mppt::getBatteryVoltage(void) {
  * we already know exactly
  * what pins the Mppt will use
  */
-Mppt::Mppt(void) : batteryADC(AnalogIn(PB_0)), bc1(BoostConverter(PA_7, PA_6)), bc2(BoostConverter (PA_5, PA_4)), bc3(BoostConverter (PA_3, PA_2)), can(&c) {}
+Mppt::Mppt(void) : batteryADC(AnalogIn(PB_0)), bc1(BoostConverter(PA_7, PA_6, PA_10)), bc2(BoostConverter (PA_5, PA_4, PA_9)), bc3(BoostConverter (PA_3, PA_2, PA_8)), can(&c) {}
 
 /* kill the thread and join
  * before destroying the object
@@ -52,10 +64,18 @@ Mppt::~Mppt(void) {
  *
  * "Eric taught me"
  * in Kanye Blame Game woman voice
+ *
+ * running is used in the loop func
+ * when running true -> false, loop stops
+ * and thread can be joined
  */
-void Mppt::init(void) {
-  running = true;
-  thread.start(callback(this, &Mppt::loop));
+bool Mppt::notInit(void) {
+  if (!running) {
+    running = true; // so thread while loop will start running
+    if (thread.start(callback(this, &Mppt::loop)) != osOK) // osOK == 0
+      running = false; // thread didn't start, so not running
+  }
+  return !running; // if running, we are init, so return false
 }
 
 /* Function to pass to thread
@@ -66,12 +86,9 @@ void Mppt::init(void) {
 void Mppt::loop(void) {
   CANMessage msg;
   while (running) {
-    if (!can->read(msg)) {
-      printf("No messages on CAN bus\n");
-    } else if (notParsed(msg)) {
-      printf("Error parsing msg\n");
-    } else {
-      printf("Successfully parsed msg!\n");
+    if (!can->read(msg) && notParsed(msg)) {
+      // no message or not parsed
+      // && stops if no message
     }
     ThisThread::sleep_for(200ms);
   }

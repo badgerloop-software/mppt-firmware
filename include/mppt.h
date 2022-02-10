@@ -5,7 +5,7 @@
 
 /* This is a struct
  * which holds a generic typed value
- * and can only fetch and change value
+ * and can only change value
  * when mutex is unlocked
  */
 template <typename T>
@@ -40,12 +40,14 @@ struct mutexVar {
 
 class BoostConverter {
   private:
+    PwmOut pwm;
     AnalogIn voltageADC;
     AnalogIn currentADC;
   public:
-    BoostConverter(PinName v, PinName i);
+    BoostConverter(PinName v, PinName i, PinName p);
     float getInputCurrent(void);
     float getInputVoltage(void);
+    void setPWM(float duty);
 };
 
 class Mppt {
@@ -65,5 +67,5 @@ class Mppt {
   public:
     Mppt(void);
     ~Mppt(void);
-    void init(void);
+    bool notInit(void);
 };

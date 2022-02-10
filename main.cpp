@@ -4,6 +4,8 @@
 Mppt mppt;
 
 int main() {
-  mppt.init();
+  if (mppt.notInit()) {
+    printf("ERROR couldn't init MPPT\n");
+  }
   while (true) {}
 }
