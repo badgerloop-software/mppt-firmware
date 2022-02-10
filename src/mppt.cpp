@@ -8,7 +8,6 @@
  * meaning they cannot copied into the class,
  * like the AnalogIn and BoostConverter can,
  * they must be passed by reference 
- * Because of this I'll pass everything by reference
  *
  * a static object is better than
  * using the new keyword 
@@ -19,7 +18,7 @@ static CAN c(PA_11, PA_12);
  * for current in and voltage in
  */
 BoostConverter::BoostConverter(PinName v, PinName i, PinName p) : voltageADC(AnalogIn(v)), currentADC(AnalogIn(i)), pwm(PwmOut(p)) {
-  pwm.period_us(12.5); // 12.5uS is 80000hZ
+  pwm.period_us(12); // 12uS is 83333hZ
 }
 
 /*
@@ -62,7 +61,7 @@ Mppt::~Mppt(void) {
 
 /* Separate function to init
  *
- * "Eric taught me"
+ * "Eudlis taught me"
  * in Kanye Blame Game woman voice
  *
  * running is used in the loop func

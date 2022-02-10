@@ -12,7 +12,7 @@ template <typename T>
 struct mutexVar {
   private:
     Mutex mutex;
-    volatile T value;
+    volatile T value = -1;
   public:
     /* volatile cannot be memcpy'd
      * so memcpy to a tmp var
