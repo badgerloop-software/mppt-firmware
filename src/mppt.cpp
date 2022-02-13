@@ -27,8 +27,11 @@ BoostConverter::BoostConverter(PinName v, PinName i, PinName p) : voltageADC(Ana
  *
  * To turn off, set duty <- 0.0
  */
-void BoostConverter::setPWM(float duty) {
+void BoostConverter::setDuty(float duty) {
   pwm.write(duty);
+}
+float BoostConverter::getDuty(void) {
+  return pwm.read();
 }
 
 /* directly read the pin rather than
@@ -41,8 +44,37 @@ float BoostConverter::getInputCurrent(void) {
 float BoostConverter::getInputVoltage(void) {
   return voltageADC.read_voltage();
 }
-float Mppt::getBatteryVoltage(void) {
+float Mppt::getOutputVoltage(void) {
   return batteryADC.read_voltage();
+}
+
+/*
+ * Vin*Iin = Vout*Iout
+ * so, sum of Iin times sum of Vin
+ * divided by Vout is Iout
+ */
+float Mppt::getOutputCurrent(void) {
+  return (
+    bc1.getInputCurrent()+
+    bc2.getInputCurrent()+
+    bc3.getInputCurrent())*
+    (
+    bc1.getInputVoltage()+
+    bc2.getInputVoltage()+
+    bc3.getInputVoltage()
+    )/getOutputVoltage();
+}
+
+/*
+ * vin and iin are averaged
+ * over the last MPPT_AVERAGE samples
+ */
+void BoostConverter::PO(float vin, float iin) {
+  float power = vin*iin;
+  if (power<last_power) direction ^= 1; // switch dir if less power than last
+  if (direction) v_ref -= MPPT_STEP;
+  else v_ref += MPPT_STEP;
+  last_power = power;
 }
 
 /* void constructor, because
@@ -71,7 +103,7 @@ Mppt::~Mppt(void) {
 bool Mppt::notInit(void) {
   if (!running) {
     running = true; // so thread while loop will start running
-    if (thread.start(callback(this, &Mppt::loop)) != osOK) // osOK == 0
+    if (thread.start(callback(this, &Mppt::canLoop)) != osOK) // osOK == 0
       running = false; // thread didn't start, so not running
   }
   return !running; // if running, we are init, so return false
@@ -82,7 +114,7 @@ bool Mppt::notInit(void) {
  * Checks the CAN bus
  * and parses the msg
  */
-void Mppt::loop(void) {
+void Mppt::canLoop(void) {
   CANMessage msg;
   while (running) {
     if (!can->read(msg) && notParsed(msg)) {
@@ -102,8 +134,12 @@ void Mppt::loop(void) {
 bool Mppt::notParsed(CANMessage msg) {
   switch (msg.id) {
 
-    case MPPT_MCC_ID:
-      maxChargeCurrent.setValue(msg.data);
+    case MPPT_MOC_ID:
+      maxOutputCurrent.setValue(msg.data);
+      break;
+
+    case MPPT_MOV_ID:
+      maxOutputVoltage.setValue(msg.data);
       break;
 
     case MPPT_MODE_ID:
