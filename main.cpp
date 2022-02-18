@@ -40,7 +40,8 @@ int main() {
         mppt.bc2.PO(vin[1],iin[1]);
         mppt.bc3.PO(vin[2],iin[2]);
         resetTracking();
-      }
+      } else
+        po_cycle--;
 
       duty[0] = mppt.bc1.pid.duty(mppt.bc1.getRefVoltage(), mppt.bc1.getInputVoltage());
       duty[1] = mppt.bc2.pid.duty(mppt.bc2.getRefVoltage(), mppt.bc2.getInputVoltage());
@@ -48,10 +49,10 @@ int main() {
 
       if (mppt.getOutputCurrent() > mppt.maxOutputCurrent.getValue()) {
         tracking--;
-        max_duty[0] = duty[0];
-        max_duty[1] = duty[1];
-        max_duty[2] = duty[2];
         if (!tracking) {
+          max_duty[0] = duty[0];
+          max_duty[1] = duty[1];
+          max_duty[2] = duty[2];
           mppt.bc1.pid.reset();
           mppt.bc2.pid.reset();
           mppt.bc3.pid.reset();
