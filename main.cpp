@@ -9,7 +9,7 @@ static int po = PO_DELAY;
 static int tracking = TRACKING_DELAY;
 static float sample_vin[3] = {0,0,0};
 static float sample_iin[3] = {0,0,0};
-static float max_duty[3] = {0,0,0};
+static float p_duty[3] = {0,0,0};
 static float duty[3] = {0,0,0};
 static float vref[3] = {0,0,0};
 static float vin[3] = {0,0,0};
@@ -68,14 +68,14 @@ int main(void) {
       if (iout > mppt.maxIout.getValue()) {
         tracking--;
         if (!tracking) {
-          max_duty[0] = duty[0];
-          max_duty[1] = duty[1];
-          max_duty[2] = duty[2];
+          p_duty[0] = duty[0];
+          p_duty[1] = duty[1];
+          p_duty[2] = duty[2];
           resetPID();
           resetPO();
-        } else
-          tracking = TRACKING_DELAY;
-      }
+        }
+      } else 
+        tracking = TRACKING_DELAY;
     }
 
     else {
@@ -85,9 +85,9 @@ int main(void) {
       duty[0] = mppt.bc1.pid.duty(iout_share, iin[0]*vin[0]/vout);
       duty[1] = mppt.bc2.pid.duty(iout_share, iin[1]*vin[1]/vout);
       duty[2] = mppt.bc3.pid.duty(iout_share, iin[2]*vin[2]/vout);
-      if (max_duty[0] <= duty[0] ||
-          max_duty[1] <= duty[1] ||
-          max_duty[2] <= duty[2]) {
+      if (p_duty[0] <= duty[0] ||
+          p_duty[1] <= duty[1] ||
+          p_duty[2] <= duty[2]) {
         tracking = TRACKING_DELAY; 
         resetPID();
         resetPO();
