@@ -8,15 +8,13 @@ PID::PID(unsigned char pterm, unsigned char iterm, unsigned char dterm, PinName 
 }
 
 float PID::duty(float desired, float now) {
-  long time = duration_cast<std::chrono::milliseconds>(_timer.elapsed_time()).count();
-  float dt = time - _ptime;
-  _ptime = time;
+  std::chrono::duration<float, std::milli> dt = std::chrono::duration_cast<std::chrono::milliseconds>(_timer.elapsed_time());
   float error = desired - now;
-  float derivative = (error - _perror) / dt;
+  _integral += error * (float)dt.count();
+  float duty = error * _p + _integral * _i + ((error - _perror) / (float)dt.count()) * _d;
   _perror = error;
-  _integral += error * dt;
-  float duty = error * _p + _integral * _i + derivative * _d;
   _pwm.write(duty);
+  _timer.reset();
   return duty;
 }
 

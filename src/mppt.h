@@ -5,7 +5,7 @@
 template <typename T> struct mutexVar {
 private:
   Mutex _mutex;
-  volatile T _value;
+  volatile T _value = -1;
 
 public:
   void setValue(unsigned char data[8]) {

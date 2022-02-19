@@ -10,7 +10,6 @@ private:
   unsigned char _p;
   unsigned char _i;
   unsigned char _d;
-  long _ptime;
   float _integral;
   float _perror;
   PwmOut _pwm;
