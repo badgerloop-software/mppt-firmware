@@ -64,9 +64,9 @@ int main() {
     else {
       float vout = mppt.getOutputVoltage();
       float share = mppt.maxOutputCurrent.getValue()/3;
-      duty[0] = mppt.bc1.pid.duty(share, mppt.bc1.getInputCurrent()*mppt.bc1.getInputCurrent()/vout);
-      duty[1] = mppt.bc2.pid.duty(share, mppt.bc2.getInputCurrent()*mppt.bc2.getInputCurrent()/vout);
-      duty[2] = mppt.bc3.pid.duty(share, mppt.bc3.getInputCurrent()*mppt.bc3.getInputCurrent()/vout);
+      duty[0] = mppt.bc1.pid.duty(share, mppt.bc1.getInputCurrent()*mppt.bc1.getInputVoltage()/vout);
+      duty[1] = mppt.bc2.pid.duty(share, mppt.bc2.getInputCurrent()*mppt.bc2.getInputVoltage()/vout);
+      duty[2] = mppt.bc3.pid.duty(share, mppt.bc3.getInputCurrent()*mppt.bc3.getInputVoltage()/vout);
       if (max_duty[0] <= duty[0] ||
           max_duty[1] <= duty[1] ||
           max_duty[2] <= duty[2]) {
