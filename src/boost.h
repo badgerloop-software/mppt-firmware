@@ -31,9 +31,9 @@ private:
 
 public:
   PID pid;
-  float getInputCurrent(void);
-  float getInputVoltage(void);
-  float getRefVoltage(void);
-  void PO(float vin, float iin);
+  float getIin(void);
+  float getVin(void);
+  float getVref(void);
+  float PO(float vin, float iin);
   BoostConverter(PinName v, PinName i, PinName p);
 };

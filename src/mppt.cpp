@@ -13,15 +13,7 @@ Mppt::~Mppt(void) {
   _thread.join();
 }
 
-float Mppt::getOutputVoltage(void) { return _batteryADC.read_voltage(); }
-
-float Mppt::getOutputCurrent(void) {
-  return (bc1.getInputCurrent() + bc2.getInputCurrent() +
-          bc3.getInputCurrent()) *
-         (bc1.getInputVoltage() + bc2.getInputVoltage() +
-          bc3.getInputVoltage()) /
-         getOutputVoltage();
-}
+float Mppt::getVout(void) { return _batteryADC.read_voltage(); }
 
 bool Mppt::notInit(void) {
   if (!_running) {
@@ -68,7 +60,7 @@ bool Mppt::notParsed(CANMessage msg) {
   switch (msg.id) {
 
   case MPPT_MOC_ID:
-    maxOutputCurrent.setValue(msg.data);
+    maxIout.setValue(msg.data);
     break;
 
   default:

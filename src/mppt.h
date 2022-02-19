@@ -2,6 +2,7 @@
 #include "mbed.h"
 #define MPPT_BASE_ID 0x0000
 #define MPPT_MOC_ID MPPT_BASE_ID + 11
+
 template <typename T> struct mutexVar {
 private:
   Mutex _mutex;
@@ -34,12 +35,12 @@ private:
   Thread _thread;
 
 public:
-  mutexVar<float> maxOutputCurrent;
+  mutexVar<float> maxIout;
   BoostConverter bc1;
   BoostConverter bc2;
   BoostConverter bc3;
-  float getOutputVoltage(void);
-  float getOutputCurrent(void);
+  float getVout(void);
+  float getIout(void);
   bool notInit(void);
   Mppt(void);
   ~Mppt(void);

@@ -1,80 +1,96 @@
 #include "mbed.h"
 #include "mppt.h"
 #define SAMPLE_SIZE 5
-#define CALC_INTERVAL 10
+#define PO_DELAY 10
 #define TRACKING_DELAY 20
 
 static Mppt mppt;
-static int po_cycle = CALC_INTERVAL;
+static int po = PO_DELAY;
 static int tracking = TRACKING_DELAY;
+static float sample_vin[3] = {0,0,0};
+static float sample_iin[3] = {0,0,0};
+static float max_duty[3] = {0,0,0};
+static float duty[3] = {0,0,0};
+static float vref[3] = {0,0,0};
 static float vin[3] = {0,0,0};
 static float iin[3] = {0,0,0};
-static float duty[3] = {0,0,0};
-static float max_duty[3] = {0,0,0};
-
-void resetTracking(void) {
-  memset(&vin, 0, 3*sizeof(float));
-  memset(&iin, 0, 3*sizeof(float));
-  po_cycle = CALC_INTERVAL;
+static float vout = 0;
+inline void readADC(void) {
+  vout = mppt.getVout();
+  iin[0] = mppt.bc1.getIin();
+  iin[1] = mppt.bc2.getIin();
+  iin[2] = mppt.bc3.getIin();
+  vin[0] = mppt.bc1.getVin();
+  vin[1] = mppt.bc2.getVin();
+  vin[2] = mppt.bc3.getVin();
+} inline void resetPO(void) {
+  memset(&sample_vin, 0, 3*sizeof(float));
+  memset(&sample_iin, 0, 3*sizeof(float));
+  po = PO_DELAY;
+} inline void resetPID(void) {
+  mppt.bc1.pid.reset();
+  mppt.bc2.pid.reset();
+  mppt.bc3.pid.reset();
 }
 
-int main() {
-  while (mppt.notInit()) {
-    printf("ERROR couldn't init MPPT\n");
-    ThisThread::sleep_for(1s);
+int main(void) {
+  while (mppt.notInit() || mppt.maxIout.getValue() == -1) {
+    ThisThread::sleep_for(2s);
   }
 
   while (true) {
+    readADC();
     if (tracking) {
-      if (po_cycle < SAMPLE_SIZE) {
-        vin[0] += mppt.bc1.getInputVoltage();
-        vin[1] += mppt.bc2.getInputVoltage();
-        vin[2] += mppt.bc3.getInputVoltage();
-        iin[0] += mppt.bc1.getInputCurrent();
-        iin[1] += mppt.bc2.getInputCurrent();
-        iin[2] += mppt.bc3.getInputCurrent();
+      if (po < SAMPLE_SIZE) {
+        sample_vin[0] += vin[0];
+        sample_vin[1] += vin[1];
+        sample_vin[2] += vin[2];
+
+        sample_iin[0] += iin[0];
+        sample_iin[1] += iin[1];
+        sample_iin[2] += iin[2];
       }
 
-      if (!po_cycle) {
-        mppt.bc1.PO(vin[0],iin[0]);
-        mppt.bc2.PO(vin[1],iin[1]);
-        mppt.bc3.PO(vin[2],iin[2]);
-        resetTracking();
+      if (!po) {
+        vref[0] = mppt.bc1.PO(sample_vin[0],sample_iin[0]);
+        vref[1] = mppt.bc2.PO(sample_vin[1],sample_iin[1]);
+        vref[2] = mppt.bc3.PO(sample_vin[2],sample_iin[2]);
+        resetPO();
       } else
-        po_cycle--;
+        po--;
 
-      duty[0] = mppt.bc1.pid.duty(mppt.bc1.getRefVoltage(), mppt.bc1.getInputVoltage());
-      duty[1] = mppt.bc2.pid.duty(mppt.bc2.getRefVoltage(), mppt.bc2.getInputVoltage());
-      duty[2] = mppt.bc3.pid.duty(mppt.bc3.getRefVoltage(), mppt.bc3.getInputVoltage());
+      duty[0] = mppt.bc1.pid.duty(vref[0], vin[0]);
+      duty[1] = mppt.bc2.pid.duty(vref[1], vin[1]);
+      duty[2] = mppt.bc3.pid.duty(vref[2], vin[2]);
 
-      if (mppt.getOutputCurrent() > mppt.maxOutputCurrent.getValue()) {
+      float iout = (vin[0]+iin[1]+iin[2])*(vin[0]+vin[1]+vin[2])/vout;
+
+      if (iout > mppt.maxIout.getValue()) {
         tracking--;
         if (!tracking) {
           max_duty[0] = duty[0];
           max_duty[1] = duty[1];
           max_duty[2] = duty[2];
-          mppt.bc1.pid.reset();
-          mppt.bc2.pid.reset();
-          mppt.bc3.pid.reset();
+          resetPID();
+          resetPO();
         } else
           tracking = TRACKING_DELAY;
       }
     }
 
     else {
-      float vout = mppt.getOutputVoltage();
-      float share = mppt.maxOutputCurrent.getValue()/3;
-      duty[0] = mppt.bc1.pid.duty(share, mppt.bc1.getInputCurrent()*mppt.bc1.getInputVoltage()/vout);
-      duty[1] = mppt.bc2.pid.duty(share, mppt.bc2.getInputCurrent()*mppt.bc2.getInputVoltage()/vout);
-      duty[2] = mppt.bc3.pid.duty(share, mppt.bc3.getInputCurrent()*mppt.bc3.getInputVoltage()/vout);
+
+      float iout_share = mppt.maxIout.getValue()/3;
+
+      duty[0] = mppt.bc1.pid.duty(iout_share, iin[0]*vin[0]/vout);
+      duty[1] = mppt.bc2.pid.duty(iout_share, iin[1]*vin[1]/vout);
+      duty[2] = mppt.bc3.pid.duty(iout_share, iin[2]*vin[2]/vout);
       if (max_duty[0] <= duty[0] ||
           max_duty[1] <= duty[1] ||
           max_duty[2] <= duty[2]) {
-        resetTracking();
         tracking = TRACKING_DELAY; 
-        mppt.bc1.pid.reset();
-        mppt.bc2.pid.reset();
-        mppt.bc3.pid.reset();
+        resetPID();
+        resetPO();
       }
     }
   }
