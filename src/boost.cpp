@@ -26,25 +26,19 @@ void PID::reset(void) {
 
 BoostConverter::BoostConverter(PinName v, PinName i, PinName p)
     : _voltageADC(AnalogIn(v)), _currentADC(AnalogIn(i)),
-      pid(PID(PTERM, ITERM, DTERM, p)), _vref(48), _pp(0), _dir(true) {}
+      pid(PID(PTERM, ITERM, DTERM, p)), _pp(0), _dir(true) {}
 
 float BoostConverter::getIin(void) {
-  return _currentADC.read_voltage();
+  return _currentADC.read_voltage()*V_SCALE;
 }
 float BoostConverter::getVin(void) {
-  return _voltageADC.read_voltage();
+  return _voltageADC.read_voltage()*I_SCALE;
 }
-
-float BoostConverter::getVref(void) { return _vref; }
 
 float BoostConverter::PO(float vin, float iin) {
   float power = vin * iin;
   if (power < _pp)
     _dir ^= 1;
-  if (_dir)
-    _vref += PO_VOLTAGE_STEP;
-  else
-    _vref -= PO_VOLTAGE_STEP;
   _pp = power;
-  return _vref;
+  return _dir ? PO_VOLTAGE_STEP : -1*PO_VOLTAGE_STEP;
 }

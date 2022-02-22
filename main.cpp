@@ -11,7 +11,7 @@ static float sample_vin[3] = {0,0,0};
 static float sample_iin[3] = {0,0,0};
 static float p_duty[3] = {0,0,0};
 static float duty[3] = {0,0,0};
-static float vref[3] = {0,0,0};
+static float vref[3] = {48,48,48};
 static float vin[3] = {0,0,0};
 static float iin[3] = {0,0,0};
 static float vout = 0;
@@ -52,9 +52,9 @@ int main(void) {
       }
 
       if (!po) {
-        vref[0] = mppt.bc1.PO(sample_vin[0],sample_iin[0]);
-        vref[1] = mppt.bc2.PO(sample_vin[1],sample_iin[1]);
-        vref[2] = mppt.bc3.PO(sample_vin[2],sample_iin[2]);
+        vref[0] += mppt.bc1.PO(sample_vin[0],sample_iin[0]);
+        vref[1] += mppt.bc2.PO(sample_vin[1],sample_iin[1]);
+        vref[2] += mppt.bc3.PO(sample_vin[2],sample_iin[2]);
         resetPO();
       } else
         po--;

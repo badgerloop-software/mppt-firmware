@@ -13,7 +13,7 @@ Mppt::~Mppt(void) {
   _thread.join();
 }
 
-float Mppt::getVout(void) { return _batteryADC.read_voltage(); }
+float Mppt::getVout(void) { return _batteryADC.read_voltage()*V_SCALE; }
 
 bool Mppt::notInit(void) {
   if (!_running) {
