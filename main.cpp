@@ -1,5 +1,4 @@
 #include "mbed.h"
-#include "mppt.h"
 
 #define DUTY .5
 #define PIN PA_10
