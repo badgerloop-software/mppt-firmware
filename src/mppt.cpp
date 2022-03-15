@@ -40,9 +40,6 @@ void Mppt::parse(CANMessage msg) {
   case MPPT_MOC_ID:
     maxIout.setValue(msg.data);
     break;
-
-  default:
-    return true;
   }
-  return false;
+
 }
