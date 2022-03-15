@@ -29,7 +29,7 @@ class Mppt {
 private:
   volatile bool _running;
   void canLoop(void);
-  bool notParsed(CANMessage msg);
+  void parse(CANMessage msg);
   CAN *_can;
   AnalogIn _batteryADC;
   Thread _thread;

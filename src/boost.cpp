@@ -8,7 +8,7 @@ PID::PID(unsigned char pterm, unsigned char iterm, unsigned char dterm, PinName 
 }
 
 float PID::duty(float desired, float now) {
-  std::chrono::duration<float, std::milli> dt = std::chrono::duration_cast<std::chrono::milliseconds>(_timer.elapsed_time());
+  std::chrono::duration<float> dt = std::chrono::duration_cast<std::chrono::seconds>(_timer.elapsed_time());
   float error = desired - now;
   _integral += error * (float)dt.count();
   float duty = error * _p + _integral * _i + ((error - _perror) / (float)dt.count()) * _d;

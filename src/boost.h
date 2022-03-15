@@ -1,9 +1,9 @@
 #include "mbed.h"
 
 #define PO_VOLTAGE_STEP 0.1
-#define PTERM 5
+#define PTERM 1
 #define ITERM 5
-#define DTERM 5
+#define DTERM 0
 
 constexpr float V_SCALE = (103.3)/3.3;
 constexpr float I_SCALE = 1/(100*.004);
