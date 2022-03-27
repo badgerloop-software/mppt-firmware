@@ -1,7 +1,7 @@
 #include "mbed.h"
 
 #define DUTY .5
-#define PIN PA_10
+#define PIN PA_9
 
 static PwmOut pwm = PwmOut(PIN);
 int main(void) {
