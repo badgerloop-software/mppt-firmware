@@ -7,11 +7,16 @@ PID::PID(unsigned char pterm, unsigned char iterm, unsigned char dterm, PinName 
   _timer.start();
 }
 
-float PID::duty(float desired, float now) {
-  std::chrono::duration<float> dt = std::chrono::duration_cast<std::chrono::seconds>(_timer.elapsed_time());
-  float error = desired - now;
+float PID::duty(float desired, float now, float max) {
+  std::chrono::duration<float, std::milli> dt = std::chrono::duration_cast<std::chrono::milliseconds>(_timer.elapsed_time());
+  float error = (desired - now)/max;
   _integral += error * (float)dt.count();
-  float duty = error * _p + _integral * _i + ((error - _perror) / (float)dt.count()) * _d;
+  float duty = 1 - (error * _p + _integral * _i + ((error - _perror) / (float)dt.count()) * _d);
+  printf("duty set to %.6f\n",duty);
+  if (duty < 0 || duty > 1) {
+    printf("ERROR DUTY OUT OF RANGE!\n");
+    duty = 1;
+  }
   _perror = error;
   _pwm.write(duty);
   _timer.reset();

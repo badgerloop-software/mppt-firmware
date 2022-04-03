@@ -3,6 +3,8 @@
 #define SAMPLE_SIZE 5
 #define PO_DELAY 10
 #define TRACKING_DELAY 20
+#define MAXV 60
+#define MAXI 7
 
 static Mppt mppt;
 static int po = PO_DELAY;
@@ -39,6 +41,7 @@ int main(void) {
   }
 
   while (true) {
+    printf("MADE IT!!!!!\n");
     readADC();
     if (tracking) {
       if (po < SAMPLE_SIZE) {
@@ -59,9 +62,9 @@ int main(void) {
       } else
         po--;
 
-      duty[0] = mppt.bc1.pid.duty(vref[0], vin[0]);
-      duty[1] = mppt.bc2.pid.duty(vref[1], vin[1]);
-      duty[2] = mppt.bc3.pid.duty(vref[2], vin[2]);
+      duty[0] = mppt.bc1.pid.duty(vref[0], vin[0], MAXV);
+      duty[1] = mppt.bc2.pid.duty(vref[1], vin[1], MAXV);
+      duty[2] = mppt.bc3.pid.duty(vref[2], vin[2], MAXV);
 
       float iout = (vin[0]+iin[1]+iin[2])*(vin[0]+vin[1]+vin[2])/vout;
 
@@ -82,9 +85,9 @@ int main(void) {
 
       float iout_share = mppt.maxIout.getValue()/3;
 
-      duty[0] = mppt.bc1.pid.duty(iout_share, iin[0]*vin[0]/vout);
-      duty[1] = mppt.bc2.pid.duty(iout_share, iin[1]*vin[1]/vout);
-      duty[2] = mppt.bc3.pid.duty(iout_share, iin[2]*vin[2]/vout);
+      duty[0] = mppt.bc1.pid.duty(iout_share, iin[0]*vin[0]/vout, MAXI);
+      duty[1] = mppt.bc2.pid.duty(iout_share, iin[1]*vin[1]/vout, MAXI);
+      duty[2] = mppt.bc3.pid.duty(iout_share, iin[2]*vin[2]/vout, MAXI);
       if (p_duty[0] <= duty[0] ||
           p_duty[1] <= duty[1] ||
           p_duty[2] <= duty[2]) {

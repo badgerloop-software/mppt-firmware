@@ -19,7 +19,7 @@ private:
   Timer _timer;
 
 public:
-  float duty(float desired, float now);
+  float duty(float desired, float now, float max);
   void reset(void);
   PID(unsigned char pterm, unsigned char iterm, unsigned char dterm, PinName p);
 };

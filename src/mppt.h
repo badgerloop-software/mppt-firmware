@@ -1,7 +1,7 @@
 #include "boost.h"
 #include "mbed.h"
 #define MPPT_BASE_ID 0x0000
-#define MPPT_MOC_ID MPPT_BASE_ID + 11
+#define MPPT_MOC_ID MPPT_BASE_ID + 10
 
 template <typename T> struct mutexVar {
 private:
@@ -19,6 +19,7 @@ public:
   T getValue(void) {
     T tmp;
     _mutex.lock();
+    printf("GETTING VALUE\n");
     tmp = _value;
     _mutex.unlock();
     return tmp;
