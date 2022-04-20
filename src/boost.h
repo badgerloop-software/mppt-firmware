@@ -15,8 +15,8 @@ DEBUG
 #define _INIT
 #define _ADC
 
-constexpr float V_SCALE = (103.3)/3.3 * 3.3;
-constexpr float I_SCALE = 1/(100*.004) * 3.3;
+constexpr float V_SCALE = (103.3) / 3.3 * 3.3;
+constexpr float I_SCALE = 1 / (100 * .004) * 3.3;
 
 class PID {
 private:
