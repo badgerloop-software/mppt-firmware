@@ -1,12 +1,12 @@
 #include "boost.h"
 #include "mbed.h"
 #define MPPT_BASE_ID 0x0000
-#define MPPT_MOC_ID MPPT_BASE_ID + 11
+#define MPPT_MOC_ID MPPT_BASE_ID + 10
 
 template <typename T> struct mutexVar {
 private:
   Mutex _mutex;
-  volatile T _value = -1;
+  volatile T _value = 7;
 
 public:
   void setValue(unsigned char data[8]) {
@@ -29,7 +29,7 @@ class Mppt {
 private:
   volatile bool _running;
   void canLoop(void);
-  bool notParsed(CANMessage msg);
+  void parse(CANMessage msg);
   CAN *_can;
   AnalogIn _batteryADC;
   Thread _thread;
