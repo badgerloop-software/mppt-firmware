@@ -6,14 +6,16 @@
 #define DTERM 0
 
 /*
-DEBUG
-*/
+HIDDEN DEBUG:
+
 #define _PID
 #define _PO
 #define _TRACKING
 #define _CURRENT
 #define _INIT
+*/
 #define _ADC
+#define _SIMULATION
 
 constexpr float V_SCALE = (103.3) / 3.3 * 3.3;
 constexpr float I_SCALE = 1 / (100 * .004) * 3.3;

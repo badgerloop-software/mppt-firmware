@@ -4,8 +4,8 @@
 PID::PID(unsigned char pterm, unsigned char iterm, unsigned char dterm,
          PinName p)
     : _p(pterm), _i(iterm), _d(dterm), _perror(0), _pwm(PwmOut(p)) {
-  _pwm.period_us(13);
   _pwm.write(0);
+  _pwm.period_us(13);
   _timer.start();
 }
 
@@ -32,7 +32,11 @@ float PID::duty(float desired, float now, float max) {
     printf("ERROR DUTY OUT OF RANGE! %.3f\n", duty);
   }
   _perror = error;
+#ifdef _SIMULATION
   _pwm.write(0);
+#else
+  _pwm.write(duty);
+#endif
   _timer.reset();
   return duty;
 }
@@ -47,10 +51,8 @@ BoostConverter::BoostConverter(PinName v, PinName i, PinName p)
     : _voltageADC(AnalogIn(v)), _currentADC(AnalogIn(i)),
       pid(PID(PTERM, ITERM, DTERM, p)), _pp(0), _dir(true) {}
 
-float BoostConverter::getIin(void) {
-  return _currentADC.read() * I_SCALE;
-  //  return _currentADC.read()*3.3*0.943+0.0294;
-}
+float BoostConverter::getIin(void) { return _currentADC.read() * I_SCALE; }
+  //  Declan's Equation : read()*3.3*0.943+0.0294;
 float BoostConverter::getVin(void) { return _voltageADC.read() * V_SCALE; }
 
 float BoostConverter::PO(float vin, float iin) {

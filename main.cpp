@@ -21,15 +21,22 @@ static float vout = 0;
 inline void readADC(void) {
   vout = mppt.getVout();
   iin[0] = mppt.bc1.getIin();
+  vin[0] = mppt.bc1.getVin();
+#ifndef _SIMULATION
   iin[1] = mppt.bc2.getIin();
   iin[2] = mppt.bc3.getIin();
-  vin[0] = mppt.bc1.getVin();
   vin[1] = mppt.bc2.getVin();
   vin[2] = mppt.bc3.getVin();
+#endif
+
 #ifdef _ADC
   printf("/ / / / / / / READ ADC  / / / / / / / \n");
   printf(" / / / / / / CYCLE %llu / / / / / \n", cycle_count++);
+#ifdef _SIMULATION
+  for (int i = 0; i < 1; i++) {
+#else
   for (int i = 0; i < 3; i++) {
+#endif
     printf("  iin[%d]: %.3f  vin[%d]: %.3f\n", i, iin[i], i, vin[i]);
   }
   printf("            vout: %.3f\n", vout);
@@ -67,7 +74,7 @@ int main(void) {
     if (tracking) {
       if (po < SAMPLE_SIZE) {
 #ifdef _PO
-        printf("  COLLECTING VIN SAMPLE No.%d\n", po + 1);
+        printf("  COLLECTING VIN SAMPLE No.%d\n", SAMPLE_SIZE - po);
 #endif
         sample_vin[0] += vin[0];
         sample_vin[1] += vin[1];
@@ -80,8 +87,11 @@ int main(void) {
 
       if (!po) {
         vref[0] += mppt.bc1.PO(sample_vin[0], sample_iin[0]);
+#ifndef _SIMULATION
         vref[1] += mppt.bc2.PO(sample_vin[1], sample_iin[1]);
         vref[2] += mppt.bc3.PO(sample_vin[2], sample_iin[2]);
+#endif
+
 #ifdef _PO
         printf("  P&O:\n");
         for (int i = 0; i < 3; i++) {
@@ -93,15 +103,21 @@ int main(void) {
         po--;
 
       duty[0] = mppt.bc1.pid.duty(vref[0], vin[0], MAXV);
+#ifndef _SIMULATION
       duty[1] = mppt.bc2.pid.duty(vref[1], vin[1], MAXV);
       duty[2] = mppt.bc3.pid.duty(vref[2], vin[2], MAXV);
+#endif
 
       float iout =
-          (vin[0] + iin[1] + iin[2]) * (vin[0] + vin[1] + vin[2]) / vout;
+          (iin[0] + iin[1] + iin[2]) * (vin[0] + vin[1] + vin[2]) / vout;
 #ifdef _TRACKING
       printf("*-*-*-*-*-*-* SET DUTY -*-*-*-*-*-*-*\n");
       printf("*-*-*-*-*- MODE: TRACKING *-*-*-*-*-*\n");
+#ifdef _SIMULATION
       for (int i = 0; i < 3; i++) {
+#else
+      for (int i = 0; i < 1; i++) {
+#endif
         printf("  duty[%d]: %.3f\n", i, duty[i]);
       }
       printf("            iout: %.3f             \n", iout);
@@ -125,20 +141,26 @@ int main(void) {
       float iout_share = mppt.maxIout.getValue() / 3;
 
       duty[0] = mppt.bc1.pid.duty(iout_share, iin[0] * vin[0] / vout, MAXI);
+#ifndef _SIMULATION
       duty[1] = mppt.bc2.pid.duty(iout_share, iin[1] * vin[1] / vout, MAXI);
       duty[2] = mppt.bc3.pid.duty(iout_share, iin[2] * vin[2] / vout, MAXI);
+#endif
 
 #ifdef _CURRENT
       printf("v^v^v^v^v^v^v SET DUTY ^v^v^v^v^v^v^v\n");
       printf("v^v^v^v^v^ MODE: CURRENT ^v^v^v^v^v^v\n");
+#ifdef _SIMULATION
+      for (int i = 0; i < 1; i++) {
+#else
       for (int i = 0; i < 3; i++) {
+#endif
         printf("  duty[%d]: %.3f\n", i, duty[i]);
       }
       printf("            iout_share: %.3f\n", iout_share);
       printf("v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v\n\n");
 #endif
-      if (p_duty[0] <= duty[0] || p_duty[1] <= duty[1] ||
-          p_duty[2] <= duty[2]) {
+      if (p_duty[0] < duty[0] || p_duty[1] < duty[1] ||
+          p_duty[2] < duty[2]) {
 #ifdef _CURRENT
         printf("  DUTY EXCEEDED PREVIOUS, CHANGING TO TRACKING\n");
 #endif
