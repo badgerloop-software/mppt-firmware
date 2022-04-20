@@ -6,7 +6,7 @@
 template <typename T> struct mutexVar {
 private:
   Mutex _mutex;
-  volatile T _value = -1;
+  volatile T _value = 7;
 
 public:
   void setValue(unsigned char data[8]) {
@@ -19,7 +19,6 @@ public:
   T getValue(void) {
     T tmp;
     _mutex.lock();
-    printf("GETTING VALUE\n");
     tmp = _value;
     _mutex.unlock();
     return tmp;
