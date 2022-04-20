@@ -138,7 +138,11 @@ int main(void) {
 
     else {
 
+#ifdef _SIMULATION
+      float iout_share = mppt.maxIout.getValue();
+#else
       float iout_share = mppt.maxIout.getValue() / 3;
+#endif
 
       duty[0] = mppt.bc1.pid.duty(iout_share, iin[0] * vin[0] / vout, MAXI);
 #ifndef _SIMULATION
