@@ -49,7 +49,6 @@ inline void resetPID(void) {
   mppt.bc3.pid.reset();
 }
 
-static PwmOut pwm = PwmOut(PIN);
 int main(void) {
   while (mppt.notInit() || mppt.maxIout.getValue() == -1) {
     printf("No Message\n");
