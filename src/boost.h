@@ -1,19 +1,19 @@
 #include "mbed.h"
 
-#define PO_VOLTAGE_STEP 0.1
-#define PTERM 1
-#define ITERM 0
+#define PO_VOLTAGE_STEP .5 
+#define PTERM 2
+#define ITERM 1
 #define DTERM 0
 
 /*
 HIDDEN DEBUG:
 
-#define _PID
-#define _PO
 #define _TRACKING
 #define _CURRENT
 #define _INIT
 */
+#define _PO
+#define _PID
 #define _ADC
 #define _SIMULATION
 

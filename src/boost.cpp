@@ -10,17 +10,18 @@ PID::PID(unsigned char pterm, unsigned char iterm, unsigned char dterm,
 }
 
 float PID::duty(float desired, float now, float max) {
+  _timer.stop();
   std::chrono::duration<float> dt =
       std::chrono::duration_cast<std::chrono::seconds>(_timer.elapsed_time());
   float error = (desired - now) / max;
-  _integral += error * (float)dt.count();
+  _integral += error * dt.count();
   float derivative = ((error - _perror) / (float)dt.count());
-  float duty = (error * _p + _integral * _i + derivative * _d);
+  float duty = (error * _p) + (_integral * _i); // + derivative * _d);
 #ifdef _PID
   printf("@%@%@%@%@%@%@ PID @%@%@%@%@%@%@%\n");
   printf("    desired: %.3f\n", desired);
   printf("        now: %.3f\n\n", now);
-  printf("         dt: %.3f\n", dt.count());
+  printf("         dt: %f\n", dt.count());
   printf("      error: %.3f\n", error);
   printf("   integral: %.3f\n", _integral);
   printf(" derivative: %.3f\n\n", derivative);
@@ -28,16 +29,11 @@ float PID::duty(float desired, float now, float max) {
   printf("       duty: %.3f\n", duty);
   printf("@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%\n");
 #endif
-  if (duty < 0 || duty > 1) {
-    printf("ERROR DUTY OUT OF RANGE! %.3f\n", duty);
-  }
+  duty = (duty < 0) ? 0 : ((duty > 1) ? 1 : duty);
   _perror = error;
-#ifdef _SIMULATION
-  _pwm.write(0);
-#else
   _pwm.write(duty);
-#endif
   _timer.reset();
+  _timer.start();
   return duty;
 }
 
@@ -58,7 +54,7 @@ float BoostConverter::getVin(void) { return _voltageADC.read() * V_SCALE; }
 float BoostConverter::PO(float vin, float iin) {
   float power = vin * iin;
   if (power < _pp) {
-    _dir ^= 1;
+    _dir = !_dir;
 #ifdef _PO
     printf("  SWITCHED DIRECTION\n");
 #endif
