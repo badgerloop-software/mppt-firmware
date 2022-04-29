@@ -1,9 +1,9 @@
 #include "mbed.h"
 
 #define PO_VOLTAGE_STEP .5 
-#define PTERM 2
-#define ITERM 1
-#define DTERM 0
+#define PTERM 1
+#define ITERM 3
+#define DTERM 1
 
 /*
 HIDDEN DEBUG:
@@ -11,10 +11,10 @@ HIDDEN DEBUG:
 #define _TRACKING
 #define _CURRENT
 #define _INIT
-*/
 #define _PO
-#define _PID
 #define _ADC
+*/
+#define _PID
 #define _SIMULATION
 
 constexpr float V_SCALE = (103.3) / 3.3 * 3.3;

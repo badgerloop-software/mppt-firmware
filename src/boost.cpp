@@ -10,24 +10,13 @@ PID::PID(unsigned char pterm, unsigned char iterm, unsigned char dterm,
 }
 
 float PID::duty(float desired, float now, float max) {
-  _timer.stop();
-  std::chrono::duration<float> dt =
-      std::chrono::duration_cast<std::chrono::seconds>(_timer.elapsed_time());
-  float error = (desired - now) / max;
-  _integral += error * dt.count();
-  float derivative = ((error - _perror) / (float)dt.count());
+  float dt = std::chrono::duration_cast<std::chrono::microseconds>(_timer.elapsed_time()).count()/(float)10000000;
+  float error = (now-desired) / max;
+  _integral += error * dt;
+  float derivative = ((error - _perror) / (float)dt);
   float duty = (error * _p) + (_integral * _i); // + derivative * _d);
 #ifdef _PID
-  printf("@%@%@%@%@%@%@ PID @%@%@%@%@%@%@%\n");
-  printf("    desired: %.3f\n", desired);
-  printf("        now: %.3f\n\n", now);
-  printf("         dt: %f\n", dt.count());
-  printf("      error: %.3f\n", error);
-  printf("   integral: %.3f\n", _integral);
-  printf(" derivative: %.3f\n\n", derivative);
-
-  printf("       duty: %.3f\n", duty);
-  printf("@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%\n");
+  printf("er: %.2f | des: %.2f | now: %.2f | du: %.2f\n", error, desired, now, duty);
 #endif
   duty = (duty < 0) ? 0 : ((duty > 1) ? 1 : duty);
   _perror = error;
