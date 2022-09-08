@@ -1,9 +1,9 @@
 #include "mbed.h"
 
 #define PO_VOLTAGE_STEP .5 
-#define PTERM 1
-#define ITERM 3
-#define DTERM 1
+#define PTERM 0.1
+#define ITERM 0.3
+#define DTERM 0.1
 
 /*
 HIDDEN DEBUG:
@@ -21,9 +21,9 @@ constexpr float I_SCALE = 1 / (100 * .004) * 3.3;
 
 class PID {
 private:
-  unsigned char _p;
-  unsigned char _i;
-  unsigned char _d;
+  float _p;
+  float _i;
+  float _d;
   float _integral;
   float _perror;
   PwmOut _pwm;
@@ -32,7 +32,7 @@ private:
 public:
   float duty(float desired, float now, float max);
   void reset(void);
-  PID(unsigned char pterm, unsigned char iterm, unsigned char dterm, PinName p);
+  PID(float pterm, float iterm, float dterm, PinName p);
 };
 
 class BoostConverter {

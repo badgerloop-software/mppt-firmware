@@ -1,7 +1,7 @@
 #include "boost.h"
 #include "mbed.h"
 
-PID::PID(unsigned char pterm, unsigned char iterm, unsigned char dterm,
+PID::PID(float pterm, float iterm, float dterm,
          PinName p)
     : _p(pterm), _i(iterm), _d(dterm), _perror(0), _pwm(PwmOut(p)) {
   _pwm.write(0);
@@ -10,7 +10,7 @@ PID::PID(unsigned char pterm, unsigned char iterm, unsigned char dterm,
 }
 
 float PID::duty(float desired, float now, float max) {
-  float dt = std::chrono::duration_cast<std::chrono::microseconds>(_timer.elapsed_time()).count()/(float)10000000;
+  float dt = std::chrono::duration_cast<std::chrono::microseconds>(_timer.elapsed_time()).count()/(float)1000000;
   float error = (now-desired) / max;
   _integral += error * dt;
   float derivative = ((error - _perror) / (float)dt);

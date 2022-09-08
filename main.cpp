@@ -1,7 +1,7 @@
 #include "mbed.h"
 #include "mppt.h"
 #define SAMPLE_SIZE 5
-#define PO_DELAY (3*SAMPLE_SIZE)
+#define PO_DELAY (3 * SAMPLE_SIZE)
 #define TRACKING_DELAY 10
 #define MAXV 60
 #define MAXI 7
@@ -54,17 +54,21 @@ inline void resetPID(void) {
   mppt.bc3.pid.reset();
 }
 
+uint64_t get_current_time() {
+  return Kernel::Clock::now().time_since_epoch().count();
+}
+
 int main(void) {
   while (mppt.notInit() || mppt.maxIout.getValue() == -1) {
     printf("No Message...\n");
     ThisThread::sleep_for(2s);
   }
 
-  uint64_t current_time = Kernel::get_ms_count()-100;
+  uint64_t current_time = get_current_time() - 100;
+
   while (true) {
-    thread_sleep_until(current_time+100);
-    current_time = Kernel::get_ms_count();
-    bool perturb = true;
+    thread_sleep_until(current_time + 100);
+    current_time = get_current_time();
     readADC();
     if (tracking) {
       if (po < SAMPLE_SIZE) {
@@ -74,9 +78,9 @@ int main(void) {
         sample_vin[0] += vin[0];
         sample_vin[1] += vin[1];
         sample_vin[2] += vin[2];
-        if (vin[1]+2 < vref[1]) {
-          printf(" ! ! VIN %.3f HAS NOT REACHED VREF %.3f ! ! ! \n",vin[1],vref[1]);
-          perturb = false;
+        if (vin[1] + 2 < vref[1]) {
+          printf(" ! ! VIN %.3f HAS NOT REACHED VREF %.3f ! ! ! \n", vin[1],
+                 vref[1]);
           resetPO();
         }
 
@@ -85,7 +89,7 @@ int main(void) {
         sample_iin[2] += iin[2];
       }
 
-      if (!po && perturb) {
+      if (!po) {
         vref[1] += mppt.bc2.PO(sample_vin[1], sample_iin[1]);
 #ifndef _SIMULATION
         vref[0] += mppt.bc1.PO(sample_vin[0], sample_iin[0]);
@@ -163,8 +167,7 @@ int main(void) {
       printf("            iout_share: %.3f\n", iout_share);
       printf("v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v\n\n");
 #endif
-      if (p_duty[0] < duty[0] || p_duty[1] < duty[1] ||
-          p_duty[2] < duty[2]) {
+      if (p_duty[0] < duty[0] || p_duty[1] < duty[1] || p_duty[2] < duty[2]) {
 #ifdef _CURRENT
         printf("  DUTY EXCEEDED PREVIOUS, CHANGING TO TRACKING\n");
 #endif
