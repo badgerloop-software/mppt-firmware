@@ -10,7 +10,6 @@ HIDDEN DEBUG:
 
 #define _TRACKING
 #define _CURRENT
-#define _INIT
 #define _PO
 #define _ADC
 */

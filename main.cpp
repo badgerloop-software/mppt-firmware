@@ -60,15 +60,11 @@ int main(void) {
     ThisThread::sleep_for(2s);
   }
 
-#ifdef _INIT
-  printf("\n\nSUCCESSSSSSS!!!!\n  MAX IOUT: %.3f\n\n\n",
-         mppt.maxIout.getValue());
-#endif
-
+  uint64_t current_time = Kernel::get_ms_count()-100;
   while (true) {
-    ThisThread::sleep_for(1s);
+    thread_sleep_until(current_time+100);
+    current_time = Kernel::get_ms_count();
     bool perturb = true;
-    //ThisThread::sleep_for(200ms);
     readADC();
     if (tracking) {
       if (po < SAMPLE_SIZE) {
