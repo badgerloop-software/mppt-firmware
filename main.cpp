@@ -128,6 +128,7 @@ int main(void) {
       printf("*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*\n\n");
 #endif
       if (iout > mppt.maxIout.getValue()) {
+        printf("MAX CURRENT EXCEEDED\n");
         tracking--;
         if (!tracking) {
           p_duty[0] = duty[0];

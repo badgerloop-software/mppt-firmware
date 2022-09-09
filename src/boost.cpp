@@ -9,7 +9,7 @@ PID::PID(float pterm, float iterm, float dterm, PinName p)
 }
 
 float PID::duty(float desired, float now, float max) {
-  float dt = std::chrono::duration_cast<std::chrono::microseconds>(
+  float dt = std::chrono::duration_cast<std::chrono::milliseconds>(
                  timer_.elapsed_time())
                  .count() /
              (float)CYCLE_MS;

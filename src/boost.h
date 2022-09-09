@@ -1,6 +1,6 @@
 #include "mbed.h"
 
-#define CYCLE_MS 3000000
+#define CYCLE_MS 3000
 #define PO_VOLTAGE_STEP .5 
 #define PTERM 0.1
 #define ITERM 0.3
