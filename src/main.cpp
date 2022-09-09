@@ -54,7 +54,7 @@ inline void resetPID(void) {
   mppt.bc3.pid.reset();
 }
 
-uint64_t get_current_time() {
+uint64_t get_ms() {
   return Kernel::Clock::now().time_since_epoch().count();
 }
 
@@ -64,11 +64,11 @@ int main(void) {
     ThisThread::sleep_for(2s);
   }
 
-  uint64_t current_time = get_current_time() - CYCLE_MS;
+  uint64_t current_time = get_ms() - CYCLE_MS;
 
   while (true) {
     thread_sleep_until(current_time + CYCLE_MS);
-    current_time = get_current_time();
+    current_time = get_ms();
     readADC();
     if (tracking) {
       if (po < SAMPLE_SIZE) {
@@ -78,15 +78,15 @@ int main(void) {
         sample_vin[0] += vin[0];
         sample_vin[1] += vin[1];
         sample_vin[2] += vin[2];
-        if (vin[1] + 2 < vref[1]) {
-          printf(" ! ! VIN %.3f HAS NOT REACHED VREF %.3f ! ! ! \n", vin[1],
-                 vref[1]);
-          resetPO();
-        }
 
         sample_iin[0] += iin[0];
         sample_iin[1] += iin[1];
         sample_iin[2] += iin[2];
+        //if (vin[1] + 2 < vref[1]) {
+        //  printf(" ! ! VIN %.3f HAS NOT REACHED VREF %.3f ! ! ! \n", vin[1],
+        //         vref[1]);
+        //  resetPO();
+        //}
       }
 
       if (!po) {
@@ -97,9 +97,9 @@ int main(void) {
 #endif
 
 #ifdef _PO
-        printf("  P&O:\n");
+        printf("P&O:\n");
         for (int i = 0; i < 3; i++) {
-          printf("  | vref[%d]: %.3f\n", i, vref[i]);
+          printf("| vref[%d]: %.3f\n", i, vref[i]);
         }
 #endif
         resetPO();
