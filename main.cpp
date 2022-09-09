@@ -64,10 +64,10 @@ int main(void) {
     ThisThread::sleep_for(2s);
   }
 
-  uint64_t current_time = get_current_time() - 100;
+  uint64_t current_time = get_current_time() - CYCLE_MS;
 
   while (true) {
-    thread_sleep_until(current_time + 100);
+    thread_sleep_until(current_time + CYCLE_MS);
     current_time = get_current_time();
     readADC();
     if (tracking) {

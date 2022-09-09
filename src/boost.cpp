@@ -12,7 +12,7 @@ float PID::duty(float desired, float now, float max) {
   float dt = std::chrono::duration_cast<std::chrono::microseconds>(
                  timer_.elapsed_time())
                  .count() /
-             (float)3000000;
+             (float)CYCLE_MS;
   float error = (now - desired) / max;
   integral_ += error * dt;
   float derivative = ((error - perror_) / (float)dt);
