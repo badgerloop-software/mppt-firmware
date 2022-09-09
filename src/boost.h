@@ -21,13 +21,13 @@ constexpr float I_SCALE = 1 / (100 * .004) * 3.3;
 
 class PID {
 private:
-  float _p;
-  float _i;
-  float _d;
-  float _integral;
-  float _perror;
-  PwmOut _pwm;
-  Timer _timer;
+  float p_;
+  float i_;
+  float d_;
+  float integral_;
+  float perror_;
+  PwmOut pwm_;
+  Timer timer_;
 
 public:
   float duty(float desired, float now, float max);
@@ -37,10 +37,10 @@ public:
 
 class BoostConverter {
 private:
-  float _pp;
-  bool _dir;
-  AnalogIn _voltageADC;
-  AnalogIn _currentADC;
+  float pp_;
+  bool dir_;
+  AnalogIn voltageADC_;
+  AnalogIn currentADC_;
 
 public:
   PID pid;
