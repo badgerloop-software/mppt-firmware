@@ -2,9 +2,9 @@
 #include "mbed.h"
 
 PID::PID(float pterm, float iterm, float dterm, PinName p)
-    : p_(pterm), i_(iterm), d_(dterm), perror_(0), pwm_(PwmOut(p)) {
-  pwm_.write(0);
+    : p_(pterm), i_(iterm), d_(dterm), perror_(0), pwm_(FastPWM(p)) {
   pwm_.period_us(13);
+  pwm_.write(0);
 }
 
 float PID::duty(float desired, float now, float max, uint64_t current_time) {

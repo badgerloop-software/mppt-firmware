@@ -1,4 +1,5 @@
 #include "mbed.h"
+#include <FastPWM.h>
 
 #define CYCLE_MS 500
 #define PO_VOLTAGE_STEP .5
@@ -28,7 +29,7 @@ private:
   float integral_;
   float perror_;
   float duty_ = 0;
-  PwmOut pwm_;
+  FastPWM pwm_;
   uint64_t p_time_;
 
 public:
