@@ -5,32 +5,29 @@ PID::PID(float pterm, float iterm, float dterm, PinName p)
     : p_(pterm), i_(iterm), d_(dterm), perror_(0), pwm_(PwmOut(p)) {
   pwm_.write(0);
   pwm_.period_us(13);
-  timer_.start();
 }
 
-float PID::duty(float desired, float now, float max) {
-  float dt = std::chrono::duration_cast<std::chrono::milliseconds>(
-                 timer_.elapsed_time())
-                 .count() /
-             (float)CYCLE_MS;
+float PID::duty(float desired, float now, float max, uint64_t current_time) {
+  float dt = (current_time - p_time_) / (float)CYCLE_MS;
   float error = (now - desired) / max;
+#ifdef _PID
+  //printf("er: %.3f | des: %.3f | now: %.3f | du: %.3f | dt: %.9f\n", error,
+  //       desired, now, duty_, dt);
+  printf("duty: %.2f\n",duty_);
+#endif
   integral_ += error * dt;
   float derivative = ((error - perror_) / (float)dt);
-  float duty = (error * p_) + (integral_ * i_); // + derivative * d_);
-#ifdef _PID
-  printf("er: %.2f | des: %.2f | now: %.2f | du: %.2f\n", error, desired, now,
-         duty);
-#endif
-  duty = (duty < 0) ? 0 : ((duty > 1) ? 1 : duty);
+  static int tmp_duty = 0;
+  duty_ = ((tmp_duty++) % 50) / (float)100; // + derivative * d_);
+  duty_ = (duty_ < 0) ? 0 : ((duty_ > 1) ? 1 : duty_);
   perror_ = error;
-  pwm_.write(duty);
-  timer_.reset();
-  timer_.start();
-  return duty;
+  pwm_.write(duty_);
+  p_time_ = current_time;
+  return duty_;
 }
 
-void PID::reset(void) {
-  timer_.reset();
+void PID::reset(uint64_t current_time) {
+  p_time_ = current_time;
   perror_ = 0;
   integral_ = 0;
 }

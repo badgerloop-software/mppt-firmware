@@ -39,7 +39,7 @@ void Mppt::parse(CANMessage msg) {
 
   case MPPT_MOC_ID:
     maxIout.setValue(msg.data);
-    printf("set maxIout to %.3f",(float)(*msg.data));
+    printf("set maxIout to %.3f",*(float*)(msg.data));
     break;
   }
 }

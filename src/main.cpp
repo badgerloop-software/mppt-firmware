@@ -14,7 +14,7 @@ static float sample_vin[3] = {0, 0, 0};
 static float sample_iin[3] = {0, 0, 0};
 static float p_duty[3] = {0, 0, 0};
 static float duty[3] = {0, 0, 0};
-static float vref[3] = {23, 23, 23};
+static float vref[3] = {24, 24, 24};
 static float vin[3] = {0, 0, 0};
 static float iin[3] = {0, 0, 0};
 static float vout = 0;
@@ -48,14 +48,16 @@ inline void resetPO(void) {
   memset(&sample_iin, 0, 3 * sizeof(float));
   po = PO_DELAY;
 }
-inline void resetPID(void) {
-  mppt.bc1.pid.reset();
-  mppt.bc2.pid.reset();
-  mppt.bc3.pid.reset();
+inline void resetPID(uint64_t current_time) {
+  mppt.bc1.pid.reset(current_time);
+  mppt.bc2.pid.reset(current_time);
+  mppt.bc3.pid.reset(current_time);
 }
 
 uint64_t get_ms() {
-  return Kernel::Clock::now().time_since_epoch().count();
+  return std::chrono::duration_cast<std::chrono::milliseconds>(
+             Kernel::Clock::now().time_since_epoch())
+      .count();
 }
 
 int main(void) {
@@ -65,6 +67,7 @@ int main(void) {
   }
 
   uint64_t current_time = get_ms() - CYCLE_MS;
+  resetPID(current_time);
 
   while (true) {
     thread_sleep_until(current_time + CYCLE_MS);
@@ -82,15 +85,15 @@ int main(void) {
         sample_iin[0] += iin[0];
         sample_iin[1] += iin[1];
         sample_iin[2] += iin[2];
-        //if (vin[1] + 2 < vref[1]) {
-        //  printf(" ! ! VIN %.3f HAS NOT REACHED VREF %.3f ! ! ! \n", vin[1],
-        //         vref[1]);
-        //  resetPO();
-        //}
+        // if (vin[1] + 2 < vref[1]) {
+        //   printf(" ! ! VIN %.3f HAS NOT REACHED VREF %.3f ! ! ! \n", vin[1],
+        //          vref[1]);
+        //   resetPO();
+        // }
       }
 
       if (!po) {
-        vref[1] += mppt.bc2.PO(sample_vin[1], sample_iin[1]);
+        // vref[1] += mppt.bc2.PO(sample_vin[1], sample_iin[1]);
 #ifndef _SIMULATION
         vref[0] += mppt.bc1.PO(sample_vin[0], sample_iin[0]);
         vref[2] += mppt.bc3.PO(sample_vin[2], sample_iin[2]);
@@ -106,10 +109,10 @@ int main(void) {
       } else
         po--;
 
-      duty[1] = mppt.bc2.pid.duty(vref[1], vin[1], MAXV);
+      duty[1] = mppt.bc2.pid.duty(vref[1], vin[1], MAXV, current_time);
 #ifndef _SIMULATION
-      duty[0] = mppt.bc1.pid.duty(vref[0], vin[0], MAXV);
-      duty[2] = mppt.bc3.pid.duty(vref[2], vin[2], MAXV);
+      duty[0] = mppt.bc1.pid.duty(vref[0], vin[0], MAXV, current_time);
+      duty[2] = mppt.bc3.pid.duty(vref[2], vin[2], MAXV, current_time);
 #endif
 
       float iout =
@@ -134,7 +137,7 @@ int main(void) {
           p_duty[0] = duty[0];
           p_duty[1] = duty[1];
           p_duty[2] = duty[2];
-          resetPID();
+          resetPID(current_time);
           resetPO();
         }
       } else
@@ -149,10 +152,13 @@ int main(void) {
       float iout_share = mppt.maxIout.getValue() / 3;
 #endif
 
-      duty[1] = mppt.bc2.pid.duty(iout_share, iin[1] * vin[1] / vout, MAXI);
+      duty[1] = mppt.bc2.pid.duty(iout_share, iin[1] * vin[1] / vout, MAXI,
+                                  current_time);
 #ifndef _SIMULATION
-      duty[0] = mppt.bc1.pid.duty(iout_share, iin[0] * vin[0] / vout, MAXI);
-      duty[2] = mppt.bc3.pid.duty(iout_share, iin[2] * vin[2] / vout, MAXI);
+      duty[0] = mppt.bc1.pid.duty(iout_share, iin[0] * vin[0] / vout, MAXI,
+                                  current_time);
+      duty[2] = mppt.bc3.pid.duty(iout_share, iin[2] * vin[2] / vout, MAXI,
+                                  current_time);
 #endif
 
 #ifdef _CURRENT
@@ -173,7 +179,7 @@ int main(void) {
         printf("  DUTY EXCEEDED PREVIOUS, CHANGING TO TRACKING\n");
 #endif
         tracking = TRACKING_DELAY;
-        resetPID();
+        resetPID(current_time);
         resetPO();
       }
     }
