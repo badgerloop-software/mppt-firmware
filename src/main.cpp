@@ -1,7 +1,7 @@
 #include "mbed.h"
 #include "mppt.h"
 #define SAMPLE_SIZE 5
-#define PO_DELAY (3 * SAMPLE_SIZE)
+#define PO_DELAY (15 * SAMPLE_SIZE)
 #define TRACKING_DELAY 10
 #define MAXV 60
 #define MAXI 7
@@ -14,7 +14,7 @@ static float sample_vin[3] = {0, 0, 0};
 static float sample_iin[3] = {0, 0, 0};
 static float p_duty[3] = {0, 0, 0};
 static float duty[3] = {0, 0, 0};
-static float vref[3] = {24, 24, 24};
+static float vref[3] = {10, 10, 10};
 static float vin[3] = {0, 0, 0};
 static float iin[3] = {0, 0, 0};
 static float vout = 0;
@@ -85,15 +85,10 @@ int main(void) {
         sample_iin[0] += iin[0];
         sample_iin[1] += iin[1];
         sample_iin[2] += iin[2];
-        // if (vin[1] + 2 < vref[1]) {
-        //   printf(" ! ! VIN %.3f HAS NOT REACHED VREF %.3f ! ! ! \n", vin[1],
-        //          vref[1]);
-        //   resetPO();
-        // }
       }
 
       if (!po) {
-        // vref[1] += mppt.bc2.PO(sample_vin[1], sample_iin[1]);
+        vref[1] += mppt.bc2.PO(sample_vin[1], sample_iin[1]);
 #ifndef _SIMULATION
         vref[0] += mppt.bc1.PO(sample_vin[0], sample_iin[0]);
         vref[2] += mppt.bc3.PO(sample_vin[2], sample_iin[2]);

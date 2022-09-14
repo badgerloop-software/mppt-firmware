@@ -1,10 +1,10 @@
 #include "mbed.h"
 #include <FastPWM.h>
 
-#define CYCLE_MS 500
+#define CYCLE_MS 100
 #define PO_VOLTAGE_STEP .5
-#define PTERM 1.0
-#define ITERM 0.0075
+#define PTERM 0.4
+#define ITERM 0.2
 #define DTERM 0.0
 
 /*
@@ -28,7 +28,6 @@ private:
   float d_;
   float integral_;
   float perror_;
-  float duty_ = 0;
   FastPWM pwm_;
   uint64_t p_time_;
 

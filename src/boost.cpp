@@ -10,20 +10,21 @@ PID::PID(float pterm, float iterm, float dterm, PinName p)
 float PID::duty(float desired, float now, float max, uint64_t current_time) {
   float dt = (current_time - p_time_) / (float)CYCLE_MS;
   float error = (now - desired) / max;
-#ifdef _PID
-  //printf("er: %.3f | des: %.3f | now: %.3f | du: %.3f | dt: %.9f\n", error,
-  //       desired, now, duty_, dt);
-  printf("duty: %.2f\n",duty_);
-#endif
   integral_ += error * dt;
   float derivative = ((error - perror_) / (float)dt);
-  static int tmp_duty = 0;
-  duty_ = ((tmp_duty++) % 50) / (float)100; // + derivative * d_);
-  duty_ = (duty_ < 0) ? 0 : ((duty_ > 1) ? 1 : duty_);
+  float duty = p_ * error + i_ * integral_; // + derivative * d_);
+  //static int tmp_duty = 0;
+  //tmp_duty = (tmp_duty+1)%101;
+  //duty = tmp_duty/(float)100;
+  duty = (duty < 0) ? 0 : ((duty > 1) ? 1 : duty);
   perror_ = error;
-  pwm_.write(duty_);
+  pwm_.write(duty);
   p_time_ = current_time;
-  return duty_;
+#ifdef _PID
+  printf("er: %.3f | des: %.3f | now: %.3f | du: %.3f | P: %.3f | I: %.3f\n", error,
+         desired, now, duty, p_*error, i_*integral_);
+#endif
+  return duty;
 }
 
 void PID::reset(uint64_t current_time) {
