@@ -1,24 +1,29 @@
-# MPPT Algorithm Source
+## MPPT Algorithm Source
 
 [reference](https://ww1.microchip.com/downloads/en/appnotes/00001521a.pdf)
 
-### boost
+#### boost
 
 - boost.cpp
-  * PID, PO, and boost converter telemetry functions
+
+PID, PO, and boost converter telemetry functions
 
 - boost.h
-  * PID magic constants, cycle time, simulation index, and print debugs
 
-### mppt
+PID magic constants, cycle time, simulation index, and print debugs
+
+#### mppt
 
 - mppt.cpp
-  * initialization, battery telemetry, and can loop functions
+
+initialization, battery telemetry, and can loop functions
 
 - mppt.h
-  * mutex and mppt message definitions
 
-### main
+mutex and mppt message definitions
+
+#### main
 
 - main.cpp
-  * contains algorithm, prints, and simulation defines
+
+contains algorithm, prints, and simulation defines
