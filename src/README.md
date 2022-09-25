@@ -2,22 +2,23 @@
 
 [reference](https://ww1.microchip.com/downloads/en/appnotes/00001521a.pdf)
 
-- boost.cpp
 
-> PID, PO, and boost converter telemetry functions
+**boost.cpp**
 
-- boost.h
+*PID, PO, and boost converter telemetry functions*
 
-> PID magic constants, cycle time, simulation index, and print debugs
+**boost.h**
 
-- mppt.cpp
+*PID magic constants, cycle time, simulation index, and print debugs*
 
-> initialization, battery telemetry, and can loop functions
+**mppt.cpp**
 
-- mppt.h
+*initialization, battery telemetry, and can loop functions*
 
-> mutex and mppt message definitions
+**mppt.h**
 
-- main.cpp
+*mutex and mppt message definitions*
 
-> contains algorithm, debug prints, more cycle timing, and scaling constants
+**main.cpp**
+
+*contains algorithm, debug prints, more cycle timing, and scaling constants*
