@@ -4,9 +4,9 @@
 static CAN c(PA_11, PA_12, 125000);
 
 Mppt::Mppt(void)                                /* voltage current pwm */
-    : _batteryADC(AnalogIn(PB_0)), bc1(BoostConverter(PA_4, PA_5, PA_10)),
-      bc2(BoostConverter(PA_6, PA_7, PA_9)),
-      bc3(BoostConverter(PA_1, PA_3, PA_8)), _can(&c) {}
+    : _batteryADC(AnalogIn(PB_0)), bc0(BoostConverter(PA_4, PA_5, PA_10)),
+      bc1(BoostConverter(PA_6, PA_7, PA_9)),
+      bc2(BoostConverter(PA_1, PA_3, PA_8)), _can(&c) {}
 
 Mppt::~Mppt(void) {
   _running = false;

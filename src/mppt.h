@@ -6,7 +6,11 @@
 template <typename T> struct mutexVar {
 private:
   Mutex _mutex;
+#ifdef _SIMULATION
   volatile T _value = 7;
+#else
+  volatile T _value = -1;
+#endif
 
 public:
   void setValue(unsigned char data[8]) {
@@ -36,9 +40,9 @@ private:
 
 public:
   mutexVar<float> maxIout;
+  BoostConverter bc0;
   BoostConverter bc1;
   BoostConverter bc2;
-  BoostConverter bc3;
   float getVout(void);
   float getIout(void);
   bool notInit(void);

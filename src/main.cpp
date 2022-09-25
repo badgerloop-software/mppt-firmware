@@ -18,22 +18,37 @@ static float vref[3] = {10, 10, 10};
 static float vin[3] = {0, 0, 0};
 static float iin[3] = {0, 0, 0};
 static float vout = 0;
-inline void readADC(void) {
+void readADC(void) {
   vout = mppt.getVout();
-  iin[1] = mppt.bc2.getIin();
-  vin[1] = mppt.bc2.getVin();
-#ifndef _SIMULATION
-  iin[0] = mppt.bc1.getIin();
-  iin[2] = mppt.bc3.getIin();
-  vin[0] = mppt.bc1.getVin();
-  vin[2] = mppt.bc3.getVin();
+#ifdef _SIMULATION
+  switch (_SIMULATION) {
+  case 0:
+    iin[0] = mppt.bc0.getIin();
+    vin[0] = mppt.bc0.getVin();
+    break;
+  case 1:
+    iin[1] = mppt.bc1.getIin();
+    vin[1] = mppt.bc1.getVin();
+    break;
+  case 2:
+    iin[2] = mppt.bc2.getIin();
+    vin[2] = mppt.bc2.getVin();
+    break;
+  }
+#else
+  iin[0] = mppt.bc0.getIin();
+  vin[0] = mppt.bc0.getVin();
+  iin[1] = mppt.bc1.getIin();
+  vin[1] = mppt.bc1.getVin();
+  iin[2] = mppt.bc2.getIin();
+  vin[2] = mppt.bc2.getVin();
 #endif
 
 #ifdef _ADC
   printf("/ / / / / / / READ ADC  / / / / / / / \n");
   printf(" / / / / / / CYCLE %llu / / / / / \n", cycle_count++);
 #ifdef _SIMULATION
-  for (int i = 1; i < 2; i++) {
+  for (int i = _SIMULATION; i <= _SIMULATION; i++) {
 #else
   for (int i = 0; i < 3; i++) {
 #endif
@@ -43,15 +58,15 @@ inline void readADC(void) {
   printf("/ / / / / / / / / / / / / / / / / / \n\n");
 #endif
 }
-inline void resetPO(void) {
+void resetPO(void) {
   memset(&sample_vin, 0, 3 * sizeof(float));
   memset(&sample_iin, 0, 3 * sizeof(float));
   po = PO_DELAY;
 }
-inline void resetPID(uint64_t current_time) {
+void resetPID(uint64_t current_time) {
+  mppt.bc0.pid.reset(current_time);
   mppt.bc1.pid.reset(current_time);
   mppt.bc2.pid.reset(current_time);
-  mppt.bc3.pid.reset(current_time);
 }
 
 uint64_t get_ms() {
@@ -66,7 +81,7 @@ int main(void) {
     ThisThread::sleep_for(2s);
   }
 
-  uint64_t current_time = get_ms() - CYCLE_MS;
+  uint64_t current_time = get_ms();
   resetPID(current_time);
 
   while (true) {
@@ -88,10 +103,22 @@ int main(void) {
       }
 
       if (!po) {
-        vref[1] += mppt.bc2.PO(sample_vin[1], sample_iin[1]);
-#ifndef _SIMULATION
-        vref[0] += mppt.bc1.PO(sample_vin[0], sample_iin[0]);
-        vref[2] += mppt.bc3.PO(sample_vin[2], sample_iin[2]);
+#ifdef _SIMULATION
+        switch (_SIMULATION) {
+        case 0:
+          vref[0] += mppt.bc0.PO(sample_vin[0], sample_iin[0]);
+          break;
+        case 1:
+          vref[1] += mppt.bc1.PO(sample_vin[1], sample_iin[1]);
+          break;
+        case 2:
+          vref[2] += mppt.bc2.PO(sample_vin[2], sample_iin[2]);
+          break;
+        }
+#else
+        vref[0] += mppt.bc0.PO(sample_vin[0], sample_iin[0]);
+        vref[1] += mppt.bc1.PO(sample_vin[1], sample_iin[1]);
+        vref[2] += mppt.bc2.PO(sample_vin[2], sample_iin[2]);
 #endif
 
 #ifdef _PO
@@ -104,10 +131,22 @@ int main(void) {
       } else
         po--;
 
-      duty[1] = mppt.bc2.pid.duty(vref[1], vin[1], MAXV, current_time);
-#ifndef _SIMULATION
-      duty[0] = mppt.bc1.pid.duty(vref[0], vin[0], MAXV, current_time);
-      duty[2] = mppt.bc3.pid.duty(vref[2], vin[2], MAXV, current_time);
+#ifdef _SIMULATION
+      switch (_SIMULATION) {
+      case 0:
+        duty[0] = mppt.bc0.pid.duty(vref[0], vin[0], MAXV, current_time);
+        break;
+      case 1:
+        duty[1] = mppt.bc1.pid.duty(vref[1], vin[1], MAXV, current_time);
+        break;
+      case 2:
+        duty[2] = mppt.bc2.pid.duty(vref[2], vin[2], MAXV, current_time);
+        break;
+      }
+#else
+      duty[0] = mppt.bc0.pid.duty(vref[0], vin[0], MAXV, current_time);
+      duty[1] = mppt.bc1.pid.duty(vref[1], vin[1], MAXV, current_time);
+      duty[2] = mppt.bc2.pid.duty(vref[2], vin[2], MAXV, current_time);
 #endif
 
       float iout =
@@ -116,9 +155,9 @@ int main(void) {
       printf("*-*-*-*-*-*-* SET DUTY -*-*-*-*-*-*-*\n");
       printf("*-*-*-*-*- MODE: TRACKING *-*-*-*-*-*\n");
 #ifdef _SIMULATION
-      for (int i = 0; i < 3; i++) {
+      for (int i = _SIMULATION; i <= _SIMULATION; i++) {
 #else
-      for (int i = 1; i < 2; i++) {
+      for (int i = 0; i < 3; i++) {
 #endif
         printf("  duty[%d]: %.3f\n", i, duty[i]);
       }
@@ -143,16 +182,29 @@ int main(void) {
 
 #ifdef _SIMULATION
       float iout_share = mppt.maxIout.getValue();
+      switch (_SIMULATION) {
+      case 0:
+        duty[0] = mppt.bc0.pid.duty(iout_share, iin[0] * vin[0] / vout, MAXI,
+                                    current_time);
+        break;
+
+      case 1:
+        duty[1] = mppt.bc1.pid.duty(iout_share, iin[1] * vin[1] / vout, MAXI,
+                                    current_time);
+        break;
+
+      case 2:
+        duty[2] = mppt.bc2.pid.duty(iout_share, iin[2] * vin[2] / vout, MAXI,
+                                    current_time);
+        break;
+      }
 #else
       float iout_share = mppt.maxIout.getValue() / 3;
-#endif
-
-      duty[1] = mppt.bc2.pid.duty(iout_share, iin[1] * vin[1] / vout, MAXI,
+      duty[0] = mppt.bc0.pid.duty(iout_share, iin[0] * vin[0] / vout, MAXI,
                                   current_time);
-#ifndef _SIMULATION
-      duty[0] = mppt.bc1.pid.duty(iout_share, iin[0] * vin[0] / vout, MAXI,
+      duty[1] = mppt.bc1.pid.duty(iout_share, iin[1] * vin[1] / vout, MAXI,
                                   current_time);
-      duty[2] = mppt.bc3.pid.duty(iout_share, iin[2] * vin[2] / vout, MAXI,
+      duty[2] = mppt.bc2.pid.duty(iout_share, iin[2] * vin[2] / vout, MAXI,
                                   current_time);
 #endif
 
@@ -160,7 +212,7 @@ int main(void) {
       printf("v^v^v^v^v^v^v SET DUTY ^v^v^v^v^v^v^v\n");
       printf("v^v^v^v^v^ MODE: CURRENT ^v^v^v^v^v^v\n");
 #ifdef _SIMULATION
-      for (int i = 1; i < 2; i++) {
+      for (int i = _SIMULATION; i <= _SIMULATION; i++) {
 #else
       for (int i = 0; i < 3; i++) {
 #endif
