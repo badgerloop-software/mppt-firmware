@@ -5,7 +5,6 @@
 
 enable floating point and 64 bit printf in `mbed-os/platform/mbed_lib.json`:
 ```json
-...
 "minimal-printf-enable-64-bit": {
     "help": "Enable printing 64 bit integers when using minimal printf library",
     "value": true
@@ -18,5 +17,4 @@ enable floating point and 64 bit printf in `mbed-os/platform/mbed_lib.json`:
     "help": "Maximum number of decimals to be printed when using minimal printf library",
     "value": 6
 }
-...
 ```

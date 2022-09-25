@@ -26,4 +26,4 @@ mutex and mppt message definitions
 
 - main.cpp
 
-contains algorithm, prints, and simulation defines
+contains algorithm, debug prints, more cycle timing, and scaling constants
