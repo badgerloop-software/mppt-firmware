@@ -13,16 +13,15 @@ float PID::duty(float desired, float now, float max, uint64_t current_time) {
   integral_ += error * dt;
   float derivative = ((error - perror_) / (float)dt);
   float duty = p_ * error + i_ * integral_; // + derivative * d_);
-  //static int tmp_duty = 0;
-  //tmp_duty = (tmp_duty+1)%101;
-  //duty = tmp_duty/(float)100;
+  // static int tmp_duty = 0;
+  // tmp_duty = (tmp_duty+1)%101;
+  // duty = tmp_duty/(float)100;
   duty = (duty < 0) ? 0 : ((duty > 1) ? 1 : duty);
   perror_ = error;
   pwm_.write(duty);
   p_time_ = current_time;
 #ifdef _PID
-  printf("er: %.3f | des: %.3f | now: %.3f | du: %.3f | P: %.3f | I: %.3f\n", error,
-         desired, now, duty, p_*error, i_*integral_);
+  printf("des: %05.2f | now: %05.2f | du: %.3f\n", desired, now, duty);
 #endif
   return duty;
 }

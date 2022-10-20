@@ -14,7 +14,7 @@ static float sample_vin[3] = {0, 0, 0};
 static float sample_iin[3] = {0, 0, 0};
 static float p_duty[3] = {0, 0, 0};
 static float duty[3] = {0, 0, 0};
-static float vref[3] = {10, 10, 10};
+static float vref[3] = {30, 30, 30};
 static float vin[3] = {0, 0, 0};
 static float iin[3] = {0, 0, 0};
 static float vout = 0;
@@ -151,6 +151,7 @@ int main(void) {
 
       float iout =
           (iin[0] + iin[1] + iin[2]) * (vin[0] + vin[1] + vin[2]) / vout;
+      printf("VOUT: %f\tIOUT: %f\n",vout,iout);
 #ifdef _TRACKING
       printf("*-*-*-*-*-*-* SET DUTY -*-*-*-*-*-*-*\n");
       printf("*-*-*-*-*- MODE: TRACKING *-*-*-*-*-*\n");

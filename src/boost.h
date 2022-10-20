@@ -15,8 +15,8 @@ HIDDEN DEBUG:
 #define _PO
 #define _ADC
 */
-#define _PID
 #define _SIMULATION 1
+#define _PID
 
 constexpr float V_SCALE = (103.3) / 3.3 * 3.3;
 constexpr float I_SCALE = 1 / (100 * .004) * 3.3;
