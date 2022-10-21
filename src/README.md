@@ -1,4 +1,4 @@
-## MPPT Algorithm Source
+# MPPT Algorithm Source
 
 [MPPT Algorithm Reference](https://ww1.microchip.com/downloads/en/appnotes/00001521a.pdf)
 - **PERTURB AND OBSERVE MPPT IMPLEMENTATION** (pg. 12)
@@ -8,7 +8,7 @@
 
 `P&O`: Perturb and Observe
 
-# Table of Contents
+## Table of Contents
 1. [Change P, I, D terms](#pid-terms)
 2. [Change Timing](#timing)
 3. [Change Constants](#constants)
