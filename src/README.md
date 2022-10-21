@@ -15,40 +15,40 @@
 
 ## PID Terms
 
-The value for floats P, I, and D can be changed in [boost.h](src/boost.h)
+The value for floats P, I, and D can be changed in [boost.h](boost.h)
 
 For now, Derivative is disabled regardless of `DTERM`s value
 
 ## Timing
 
-[CYCLE_MS](src/boost.h): Minimum time between loop cycles. The loop will sleep until this many milliseconds has passed
+[CYCLE_MS](boost.h): Minimum time between loop cycles. The loop will sleep until this many milliseconds has passed
 
-[PO_DELAY](src/main.cpp): Number of cycles before perturbing (changing the target input voltage)
+[PO_DELAY](main.cpp): Number of cycles before perturbing (changing the target input voltage)
 
-[TRACKING_DELAY](src/main.cpp): Number of "chances" (consecutive cycles during which output current exceeds max output current requested over CAN) before switching to regulation mode
+[TRACKING_DELAY](main.cpp): Number of "chances" (consecutive cycles during which output current exceeds max output current requested over CAN) before switching to regulation mode
 
-[SAMPLE_SIZE](src/main.cpp): Number of cycles or samples of input voltage for P&0 (summed together, but since power is compared and SAMPLE_SIZE doesn't dynamically change, the ratio cancels out number of samples taken)
+[SAMPLE_SIZE](main.cpp): Number of cycles or samples of input voltage for P&0 (summed together, but since power is compared and SAMPLE_SIZE doesn't dynamically change, the ratio cancels out number of samples taken)
 
 
 ## Constants
 
-[PO_VOLTAGE_STEP](src/boost.h): Voltage added or subtracted every P&O cycle (check reference if confused)
+[PO_VOLTAGE_STEP](boost.h): Voltage added or subtracted every P&O cycle (check reference if confused)
 
-[MAXV](src/main.cpp): Maximum expected voltage which is used to scale the input voltage when calculating error for PID
+[MAXV](main.cpp): Maximum expected voltage which is used to scale the input voltage when calculating error for PID
 
-[MAXI](src/main.cpp): Maximum expected voltage which is used to scale the input current when calculating error for PID
+[MAXI](main.cpp): Maximum expected voltage which is used to scale the input current when calculating error for PID
 
 ## Debug Print
 
 *THIS SLOWS DOWN THE MCU*
 
-Comment and uncomment debug print defines to toggle messages at `HIDDEN DEBUG` in [boost.h](src/boost.h).
+Comment and uncomment debug print defines to toggle messages at `HIDDEN DEBUG` in [boost.h](boost.h).
 
 ## Simulation Mode
 
-The `_SIMULATION` definition in [boost.h](src/boost.h) is the index of the boost converter you are using for simulation
+The `_SIMULATION` definition in [boost.h](boost.h) is the index of the boost converter you are using for simulation
 
-Simulation means 1 of the 3 boost converters is being tested. The consequences of this can be seen in [main.cpp](src/main.cpp)s `#ifdef`s
+Simulation means 1 of the 3 boost converters is being tested. The consequences of this can be seen in [main.cpp](main.cpp)s `#ifdef`s
 
 To use all 3 boost converters, comment `_SIMULATION` out. *Then, the loop expects a CAN message and won't start until the max output current is set*
 
