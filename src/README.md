@@ -1,6 +1,9 @@
 ## MPPT Algorithm Source
 
-[MPPT Algorithm Reference](https://ww1.microchip.com/downloads/en/appnotes/00001521a.pdf) Used PERTURB AND OBSERVE MPPT IMPLEMENTATION (pg. 12) and THE MAIN PROGRAM LOOP (pg. 10)
+[MPPT Algorithm Reference](https://ww1.microchip.com/downloads/en/appnotes/00001521a.pdf)
+- **PERTURB AND OBSERVE MPPT IMPLEMENTATION** (pg. 12)
+- **THE MAIN PROGRAM LOOP** (pg. 10)
+
 [PID Reference](https://gist.github.com/bradley219/5373998)
 
 `P&0`: Perturb and Observe
@@ -17,7 +20,7 @@
 
 The value for floats P, I, and D can be changed in [boost.h](boost.h)
 
-For now, Derivative is disabled regardless of `DTERM`s value
+For now, Derivative is disabled regardless of `DTERM`'s value
 
 ## Timing
 
@@ -48,9 +51,9 @@ Comment and uncomment debug print defines to toggle messages at `HIDDEN DEBUG` i
 
 The `_SIMULATION` definition in [boost.h](boost.h) is the index of the boost converter you are using for simulation
 
-Simulation means 1 of the 3 boost converters is being tested. The consequences of this can be seen in [main.cpp](main.cpp)s `#ifdef`s
+Simulation means 1 of the 3 boost converters is being tested. The consequences of this can be seen in [main.cpp](main.cpp)s `#ifdef`'s
 
-To use all 3 boost converters, comment `_SIMULATION` out. *Then, the loop expects a CAN message and won't start until the max output current is set*
+To use all 3 boost converters, comment `_SIMULATION` out. **Then, the loop expects a CAN message and won't start until the max output current is set**
 
 ## File descriptions
 
@@ -64,7 +67,7 @@ PID magic constants, cycle time, simulation index, and print debugs
 
 **mppt.cpp**
 
-Pin connections, Initialization, battery telemetry, and CAN loop functions*
+Pin connections, Initialization, battery telemetry, and CAN loop functions
 
 **mppt.h**
 
