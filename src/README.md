@@ -37,9 +37,11 @@ For now, Derivative is disabled regardless of `DTERM`'s value
 
 [PO_VOLTAGE_STEP](boost.h): Voltage added or subtracted every P&O cycle (check reference if confused)
 
-[MAXV](main.cpp): Maximum expected voltage which is used to scale the input voltage when calculating error for PID
+[MAXV](main.cpp): Maximum expected voltage which is used to scale the input voltage when calculating error for voltage PID
 
-[MAXI](main.cpp): Maximum expected voltage which is used to scale the input current when calculating error for PID
+[MAXI](main.cpp): Maximum expected current which is used to scale the input current when calculating error for current PID
+
+[`static float vref[3] = {30, 30, 30};`](main.cpp): P&O needs an initial "guess" at to where the MPP voltage is. This starting point is where we perturb from
 
 ## Debug Print
 
@@ -57,22 +59,22 @@ To use all 3 boost converters, comment `_SIMULATION` out. **Then, the loop expec
 
 ## File descriptions
 
-**boost.cpp**
+- [boost.cpp](boost.cpp)
 
 PID, PO, and boost converter telemetry functions
 
-**boost.h**
+- [boost.h](boost.h)
 
 PID magic constants, cycle time, simulation index, and print debugs
 
-**mppt.cpp**
+- [mppt.cpp](mppt.cpp)
 
 Pin connections, Initialization, battery telemetry, and CAN loop functions
 
-**mppt.h**
+- [mppt.h](mppt.h)
 
 Mutex and CAN message definitions
 
-**main.cpp**
+- [main.cpp](main.cpp)
 
 Main Loop from reference, debug prints, more cycle timing, and scaling constants
