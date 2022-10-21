@@ -6,7 +6,7 @@
 
 [PID Reference](https://gist.github.com/bradley219/5373998)
 
-`P&0`: Perturb and Observe
+`P&O`: Perturb and Observe
 
 # Table of Contents
 1. [Change P, I, D terms](#pid-terms)
@@ -30,7 +30,7 @@ For now, Derivative is disabled regardless of `DTERM`'s value
 
 [TRACKING_DELAY](main.cpp): Number of "chances" (consecutive cycles during which output current exceeds max output current requested over CAN) before switching to regulation mode
 
-[SAMPLE_SIZE](main.cpp): Number of cycles or samples of input voltage for P&0 (summed together, but since power is compared and SAMPLE_SIZE doesn't dynamically change, the ratio cancels out number of samples taken)
+[SAMPLE_SIZE](main.cpp): Number of cycles or samples of input voltage for P&O (summed together, but since power is compared and SAMPLE_SIZE doesn't dynamically change, the ratio cancels out number of samples taken)
 
 
 ## Constants
@@ -43,7 +43,7 @@ For now, Derivative is disabled regardless of `DTERM`'s value
 
 ## Debug Print
 
-*THIS SLOWS DOWN THE MCU*
+**THIS SLOWS DOWN THE MCU**
 
 Comment and uncomment debug print defines to toggle messages at `HIDDEN DEBUG` in [boost.h](boost.h).
 
@@ -51,7 +51,7 @@ Comment and uncomment debug print defines to toggle messages at `HIDDEN DEBUG` i
 
 The `_SIMULATION` definition in [boost.h](boost.h) is the index of the boost converter you are using for simulation
 
-Simulation means 1 of the 3 boost converters is being tested. The consequences of this can be seen in [main.cpp](main.cpp)s `#ifdef`'s
+Simulation means 1 of the 3 boost converters is being tested. The consequences of this can be seen in [main.cpp](main.cpp)'s `#ifdef`s
 
 To use all 3 boost converters, comment `_SIMULATION` out. **Then, the loop expects a CAN message and won't start until the max output current is set**
 
