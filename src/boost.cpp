@@ -8,7 +8,7 @@ PID::PID(float pterm, float iterm, float dterm, PinName p)
 }
 
 float PID::duty(float desired, float now, float max, uint64_t current_time) {
-  float dt = (current_time - p_time_) / (float)CYCLE_MS;
+  float dt = (current_time - p_time_) / (float)CYCLE_MS.count();
   float error = (now - desired) / max;
   integral_ += error * dt;
   float derivative = ((error - perror_) / (float)dt);
@@ -44,9 +44,6 @@ float BoostConverter::PO(float vin, float iin) {
   float power = vin * iin;
   if (power < pp_) {
     dir_ = !dir_;
-#ifdef _PO
-    printf("  SWITCHED DIRECTION\n");
-#endif
   }
   pp_ = power;
   return dir_ ? PO_VOLTAGE_STEP : -1 * PO_VOLTAGE_STEP;

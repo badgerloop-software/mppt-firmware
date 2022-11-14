@@ -1,7 +1,7 @@
 #include "mbed.h"
 #include <FastPWM.h>
 
-#define CYCLE_MS 100
+#define CYCLE_MS 100ms
 #define PO_VOLTAGE_STEP .5
 #define PTERM 0.4
 #define ITERM 0.2
@@ -28,13 +28,13 @@ private:
   float d_;
   float integral_;
   float perror_;
-  FastPWM pwm_;
   uint64_t p_time_;
 
 public:
   float duty(float desired, float now, float max, uint64_t current_time);
   void reset(uint64_t current_time);
   PID(float pterm, float iterm, float dterm, PinName p);
+  FastPWM pwm_;
 };
 
 class BoostConverter {
