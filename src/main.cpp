@@ -5,12 +5,13 @@
 #define TRACKING_DELAY 10
 #define MAXV 60
 #define MAXI 7
+#define MPP_VIN_CYCLES 500
 
 typedef std::chrono::duration<long long, std::ratio<1, 1000>> millisecond;
 
 static Mppt mppt;
 static int po = PO_DELAY;
-static unsigned long long cycle_count = 0;
+static unsigned long long cycles = 0;
 static int tracking = TRACKING_DELAY;
 static float sample_vin[3] = {0, 0, 0};
 static float sample_iin[3] = {0, 0, 0};
@@ -22,8 +23,8 @@ static float iin[3] = {0, 0, 0};
 static float vout = 0;
 void readADC(void) {
   vout = mppt.getVout();
-#ifdef _SIMULATION
-  switch (_SIMULATION) {
+#ifdef SIMULATION_
+  switch (SIMULATION_) {
   case 0:
     iin[0] = mppt.bc0.getIin();
     vin[0] = mppt.bc0.getVin();
@@ -67,7 +68,7 @@ millisecond get_ms() {
 float mpp_vin() {
   float mpp_vin, mpp_pow = 0;
   for (int i = 0; i <= 20; i++) {
-    switch (_SIMULATION) {
+    switch (SIMULATION_) {
     case 0:
       mppt.bc0.pid.pwm_.write(i * .05);
       break;
@@ -80,7 +81,7 @@ float mpp_vin() {
     }
     ThisThread::sleep_for(CYCLE_MS);
     float vin, iin, pow;
-    switch (_SIMULATION) {
+    switch (SIMULATION_) {
     case 0:
       vin = mppt.bc0.getVin();
       iin = mppt.bc0.getIin();
@@ -100,7 +101,7 @@ float mpp_vin() {
       mpp_pow = pow;
     }
   }
-  switch (_SIMULATION) {
+  switch (SIMULATION_) {
   case 0:
     mppt.bc0.pid.pwm_.write(duty[0]);
     break;
@@ -126,6 +127,8 @@ int main(void) {
   while (true) {
     thread_sleep_until((current_time + CYCLE_MS).count());
     current_time = get_ms();
+    if (cycles++ % MPP_VIN_CYCLES == 0)
+      printf("MPP VIN: %f | ", mpp_vin());
     readADC();
     if (tracking) {
       if (po < SAMPLE_SIZE) {
@@ -139,8 +142,8 @@ int main(void) {
       }
 
       if (!po) {
-#ifdef _SIMULATION
-        switch (_SIMULATION) {
+#ifdef SIMULATION_
+        switch (SIMULATION_) {
         case 0:
           vref[0] += mppt.bc0.PO(sample_vin[0], sample_iin[0]);
           break;
@@ -161,8 +164,8 @@ int main(void) {
       } else
         po--;
 
-#ifdef _SIMULATION
-      switch (_SIMULATION) {
+#ifdef SIMULATION_
+      switch (SIMULATION_) {
       case 0:
         duty[0] =
             mppt.bc0.pid.duty(vref[0], vin[0], MAXV, current_time.count());
@@ -200,9 +203,9 @@ int main(void) {
 
     else {
 
-#ifdef _SIMULATION
+#ifdef SIMULATION_
       float iout_share = mppt.maxIout.getValue();
-      switch (_SIMULATION) {
+      switch (SIMULATION_) {
       case 0:
         duty[0] = mppt.bc0.pid.duty(iout_share, iin[0] * vin[0] / vout, MAXI,
                                     current_time.count());

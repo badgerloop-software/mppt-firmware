@@ -12,9 +12,8 @@
 1. [Change P, I, D terms](#pid-terms)
 2. [Change Timing](#timing)
 3. [Change Constants](#constants)
-4. [Debug Print](#debug-print)
-5. [Simulation Mode](#simulation-mode)
-6. [File Descriptions](#file-descriptions)
+4. [Simulation Mode](#simulation-mode)
+5. [File Descriptions](#file-descriptions)
 
 ## PID Terms
 
@@ -43,19 +42,13 @@ For now, Derivative is disabled regardless of `DTERM`'s value
 
 [`static float vref[3] = {30, 30, 30};`](main.cpp): P&O needs an initial "guess" at to where the MPP voltage is. This starting point is where we perturb from
 
-## Debug Print
-
-**THIS SLOWS DOWN THE MCU**
-
-Comment and uncomment debug print defines to toggle messages at `HIDDEN DEBUG` in [boost.h](boost.h).
-
 ## Simulation Mode
 
-The `_SIMULATION` definition in [boost.h](boost.h) is the index of the boost converter you are using for simulation
+The `SIMULATION_` definition in [boost.h](boost.h) is the index of the boost converter you are using for simulation
 
 Simulation means 1 of the 3 boost converters is being tested. The consequences of this can be seen in [main.cpp](main.cpp)'s `#ifdef`s
 
-To use all 3 boost converters, comment `_SIMULATION` out. **Then, the loop expects a CAN message and won't start until the max output current is set**
+To use all 3 boost converters, comment `SIMULATION_` out. **Then, the loop expects a CAN message and won't start until the max output current is set**
 
 ## File descriptions
 
@@ -65,7 +58,7 @@ PID, PO, and boost converter telemetry functions
 
 - [boost.h](boost.h)
 
-PID magic constants, cycle time, simulation index, and print debugs
+PID magic constants, cycle time and simulation index
 
 - [mppt.cpp](mppt.cpp)
 

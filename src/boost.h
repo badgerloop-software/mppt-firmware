@@ -9,14 +9,9 @@
 
 /*
 HIDDEN DEBUG:
-
-#define _TRACKING
-#define _CURRENT
-#define _PO
-#define _ADC
 */
-#define _SIMULATION 1
-#define _PID
+#define SIMULATION_ 1
+#define PID_
 
 constexpr float V_SCALE = (103.3) / 3.3 * 3.3;
 constexpr float I_SCALE = 1 / (100 * .004) * 3.3;

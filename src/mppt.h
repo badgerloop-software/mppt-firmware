@@ -5,38 +5,38 @@
 
 template <typename T> struct mutexVar {
 private:
-  Mutex _mutex;
-#ifdef _SIMULATION
-  volatile T _value = 7;
+  Mutex mutex_;
+#ifdef SIMULATION_
+  volatile T value_ = 7;
 #else
-  volatile T _value = -1;
+  volatile T value_ = -1;
 #endif
 
 public:
   void setValue(unsigned char data[8]) {
     T tmp;
     memcpy(&tmp, data, sizeof(T));
-    _mutex.lock();
-    _value = tmp;
-    _mutex.unlock();
+    mutex_.lock();
+    value_ = tmp;
+    mutex_.unlock();
   }
   T getValue(void) {
     T tmp;
-    _mutex.lock();
-    tmp = _value;
-    _mutex.unlock();
+    mutex_.lock();
+    tmp = value_;
+    mutex_.unlock();
     return tmp;
   }
 };
 
 class Mppt {
 private:
-  volatile bool _running;
+  volatile bool running_;
   void canLoop(void);
   void parse(CANMessage msg);
-  CAN *_can;
-  AnalogIn _batteryADC;
-  Thread _thread;
+  CAN *can_;
+  AnalogIn batteryADC_;
+  Thread thread_;
 
 public:
   mutexVar<float> maxIout;
