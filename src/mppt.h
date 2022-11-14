@@ -13,7 +13,7 @@ private:
 #endif
 
 public:
-  void setValue(unsigned char data[8]) {
+  void setValue(unsigned char *data) {
     T tmp;
     memcpy(&tmp, data, sizeof(T));
     mutex_.lock();
