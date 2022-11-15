@@ -23,11 +23,10 @@ private:
   float d_;
   float integral_;
   float perror_;
-  uint64_t p_time_;
 
 public:
-  float duty(float desired, float now, float max, uint64_t current_time);
-  void reset(uint64_t current_time);
+  float duty(float desired, float now, float max, uint64_t change);
+  void reset();
   PID(float pterm, float iterm, float dterm, PinName p);
   FastPWM pwm_;
 };
