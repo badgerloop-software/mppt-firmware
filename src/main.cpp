@@ -69,7 +69,7 @@ millisecond get_ms() {
 #ifdef SIMULATION_
 float mpp_vin() {
   float mpp_vin, mpp_pow = 0;
-  for (int i = 0; i <= 20; i++) {
+  for (int i = 0; i <= 14; i++) {
     switch (SIMULATION_) {
     case 0:
       mppt.bc0.pid.pwm_.write(i * (float)1 / 20);
@@ -116,6 +116,7 @@ float mpp_vin() {
     mppt.bc2.pid.pwm_.write(duty[2]);
     break;
   }
+  ThisThread::sleep_for(CYCLE_MS);
   return mpp_vin;
 }
 #endif
