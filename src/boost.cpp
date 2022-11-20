@@ -21,7 +21,7 @@ float PID::duty(float desired, float now, float max, uint64_t change) {
   perror_ = error;
   pwm_.write(duty);
 #ifdef _PID
-  printf("des: %05.2f | now: %05.2f | du: %.3f\n", desired, now, duty);
+  printf("des: %05.2f | now: %05.2f | du: %.3f | dt: %.3f\n", desired, now, duty, dt);
 #endif
   return duty;
 }

@@ -72,16 +72,16 @@ float mpp_vin() {
   for (int i = 0; i <= 20; i++) {
     switch (SIMULATION_) {
     case 0:
-      mppt.bc0.pid.pwm_.write(i * (float)1 / 20.05);
+      mppt.bc0.pid.pwm_.write(i * (float)1 / 20);
       break;
     case 1:
-      mppt.bc1.pid.pwm_.write(i * .05);
+      mppt.bc1.pid.pwm_.write(i * (float)1 / 20);
       break;
     case 2:
-      mppt.bc2.pid.pwm_.write(i * .05);
+      mppt.bc2.pid.pwm_.write(i * (float)1 / 20);
       break;
     }
-    // ThisThread::sleep_for(CYCLE_MS);
+    ThisThread::sleep_for(CYCLE_MS);
     float vin, iin, pow;
     switch (SIMULATION_) {
     case 0:
@@ -98,6 +98,8 @@ float mpp_vin() {
       break;
     }
     pow = vin * iin;
+    printf("\tDuty: %.03f | Pow: %.03f | MPP Pow: %.03f | MPP Vin: %.03f\n",
+           i * (float)1 / 20, pow, mpp_pow, mpp_vin);
     if (pow > mpp_pow) {
       mpp_vin = vin;
       mpp_pow = pow;
@@ -128,11 +130,13 @@ int main() {
 
   while (true) {
     thread_sleep_until((p_time + CYCLE_MS).count());
-    current_time = get_ms();
 #ifdef SIMULATION_
-    if (cycles++ % MPP_VIN_CYCLES == 0)
+    if (cycles++ % MPP_VIN_CYCLES == 0) {
       printf("MPP VIN: %f | ", mpp_vin());
+      p_time = get_ms();
+    }
 #endif
+    current_time = get_ms();
     readADC();
     if (tracking) {
       if (po < SAMPLE_SIZE) {
@@ -171,22 +175,25 @@ int main() {
 #ifdef SIMULATION_
       switch (SIMULATION_) {
       case 0:
-        duty[0] =
-            mppt.bc0.pid.duty(vref[0], vin[0], MAXV, (current_time-p_time).count());
+        duty[0] = mppt.bc0.pid.duty(vref[0], vin[0], MAXV,
+                                    (current_time - p_time).count());
         break;
       case 1:
-        duty[1] =
-            mppt.bc1.pid.duty(vref[1], vin[1], MAXV, (current_time-p_time).count());
+        duty[1] = mppt.bc1.pid.duty(vref[1], vin[1], MAXV,
+                                    (current_time - p_time).count());
         break;
       case 2:
-        duty[2] =
-            mppt.bc2.pid.duty(vref[2], vin[2], MAXV, (current_time-p_time).count());
+        duty[2] = mppt.bc2.pid.duty(vref[2], vin[2], MAXV,
+                                    (current_time - p_time).count());
         break;
       }
 #else
-      duty[0] = mppt.bc0.pid.duty(vref[0], vin[0], MAXV, (current_time-p_time).count());
-      duty[1] = mppt.bc1.pid.duty(vref[1], vin[1], MAXV, (current_time-p_time).count());
-      duty[2] = mppt.bc2.pid.duty(vref[2], vin[2], MAXV, (current_time-p_time).count());
+      duty[0] = mppt.bc0.pid.duty(vref[0], vin[0], MAXV,
+                                  (current_time - p_time).count());
+      duty[1] = mppt.bc1.pid.duty(vref[1], vin[1], MAXV,
+                                  (current_time - p_time).count());
+      duty[2] = mppt.bc2.pid.duty(vref[2], vin[2], MAXV,
+                                  (current_time - p_time).count());
 #endif
 
       float iout =
@@ -212,27 +219,27 @@ int main() {
       switch (SIMULATION_) {
       case 0:
         duty[0] = mppt.bc0.pid.duty(iout_share, iin[0] * vin[0] / vout, MAXI,
-                                    (current_time-p_time).count());
+                                    (current_time - p_time).count());
         break;
 
       case 1:
         duty[1] = mppt.bc1.pid.duty(iout_share, iin[1] * vin[1] / vout, MAXI,
-                                    (current_time-p_time).count());
+                                    (current_time - p_time).count());
         break;
 
       case 2:
         duty[2] = mppt.bc2.pid.duty(iout_share, iin[2] * vin[2] / vout, MAXI,
-                                    (current_time-p_time).count());
+                                    (current_time - p_time).count());
         break;
       }
 #else
       float iout_share = mppt.maxIout.getValue() / 3;
       duty[0] = mppt.bc0.pid.duty(iout_share, iin[0] * vin[0] / vout, MAXI,
-                                  (current_time-p_time).count());
+                                  (current_time - p_time).count());
       duty[1] = mppt.bc1.pid.duty(iout_share, iin[1] * vin[1] / vout, MAXI,
-                                  (current_time-p_time).count());
+                                  (current_time - p_time).count());
       duty[2] = mppt.bc2.pid.duty(iout_share, iin[2] * vin[2] / vout, MAXI,
-                                  (current_time-p_time).count());
+                                  (current_time - p_time).count());
 #endif
 
       if (p_duty[0] < duty[0] || p_duty[1] < duty[1] || p_duty[2] < duty[2]) {
