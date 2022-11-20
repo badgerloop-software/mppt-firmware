@@ -3,7 +3,7 @@
 
 #define CYCLE_MS 100ms
 #define PO_VOLTAGE_STEP .5
-#define PTERM 0.4
+#define PTERM 0.1
 #define ITERM 0.2
 #define DTERM 0.0
 

@@ -5,7 +5,7 @@
 #define TRACKING_DELAY 10
 #define MAXV 60
 #define MAXI 7
-#define MPP_VIN_CYCLES 500
+#define MPP_VIN_CYCLES 50
 
 typedef std::chrono::duration<long long, std::ratio<1, 1000>> millisecond;
 
@@ -98,8 +98,8 @@ float mpp_vin() {
       break;
     }
     pow = vin * iin;
-    printf("\tDuty: %.03f | Pow: %.03f | MPP Pow: %.03f | MPP Vin: %.03f\n",
-           i * (float)1 / 20, pow, mpp_pow, mpp_vin);
+    printf("\tDuty: %.03f | Vin: %.03f | Pow: %.03f | MPP Pow: %.03f | MPP Vin: %.03f\n",
+           i * (float)1 / 20, vin, pow, mpp_pow, mpp_vin);
     if (pow > mpp_pow) {
       mpp_vin = vin;
       mpp_pow = pow;
@@ -129,14 +129,16 @@ int main() {
 
   millisecond current_time, p_time = get_ms();
 
+  float mvin = 0;
   while (true) {
-    thread_sleep_until((p_time + CYCLE_MS).count());
 #ifdef SIMULATION_
     if (cycles++ % MPP_VIN_CYCLES == 0) {
-      printf("MPP VIN: %f | ", mpp_vin());
       p_time = get_ms();
+      mvin = mpp_vin();
     }
+    printf("MPP VIN: %f | ", mvin);
 #endif
+    thread_sleep_until((p_time + CYCLE_MS).count());
     current_time = get_ms();
     readADC();
     if (tracking) {
