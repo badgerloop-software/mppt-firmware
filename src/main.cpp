@@ -66,61 +66,6 @@ millisecond get_ms() {
       Kernel::Clock::now().time_since_epoch());
 }
 
-#ifdef SIMULATION_
-float mpp_vin() {
-  float mpp_vin, mpp_pow = 0;
-  for (int i = 0; i <= 14; i++) {
-    switch (SIMULATION_) {
-    case 0:
-      mppt.bc0.pid.pwm_.write(i * (float)1 / 20);
-      break;
-    case 1:
-      mppt.bc1.pid.pwm_.write(i * (float)1 / 20);
-      break;
-    case 2:
-      mppt.bc2.pid.pwm_.write(i * (float)1 / 20);
-      break;
-    }
-    ThisThread::sleep_for(CYCLE_MS);
-    float vin, iin, pow;
-    switch (SIMULATION_) {
-    case 0:
-      vin = mppt.bc0.getVin();
-      iin = mppt.bc0.getIin();
-      break;
-    case 1:
-      vin = mppt.bc1.getVin();
-      iin = mppt.bc1.getIin();
-      break;
-    case 2:
-      vin = mppt.bc2.getVin();
-      iin = mppt.bc2.getIin();
-      break;
-    }
-    pow = vin * iin;
-    printf("\tDuty: %.03f | Vin: %.03f | Pow: %.03f | MPP Pow: %.03f | MPP Vin: %.03f\n",
-           i * (float)1 / 20, vin, pow, mpp_pow, mpp_vin);
-    if (pow > mpp_pow) {
-      mpp_vin = vin;
-      mpp_pow = pow;
-    }
-  }
-  switch (SIMULATION_) {
-  case 0:
-    mppt.bc0.pid.pwm_.write(duty[0]);
-    break;
-  case 1:
-    mppt.bc1.pid.pwm_.write(duty[1]);
-    break;
-  case 2:
-    mppt.bc2.pid.pwm_.write(duty[2]);
-    break;
-  }
-  ThisThread::sleep_for(CYCLE_MS);
-  return mpp_vin;
-}
-#endif
-
 int main() {
   while (mppt.notInit() || mppt.maxIout.getValue() == -1) {
     printf("No Message...\n");
@@ -131,13 +76,8 @@ int main() {
 
   float mvin = 0;
   while (true) {
-#ifdef SIMULATION_
-    if (cycles++ % MPP_VIN_CYCLES == 0) {
-      p_time = get_ms();
-      mvin = mpp_vin();
-    }
-    printf("MPP VIN: %f | ", mvin);
-#endif
+    DigitalOut d(PA_7);
+    d.write(1);
     thread_sleep_until((p_time + CYCLE_MS).count());
     current_time = get_ms();
     readADC();
